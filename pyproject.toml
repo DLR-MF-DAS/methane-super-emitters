@@ -16,6 +16,15 @@ dependencies = [
     "pytest",
     "click",
     "pdoc",
+    "matplotlib",
+    "geopandas",
+    "geopy",
+    "scipy",
+    "netCDF4",
+    "numpy",
+    "shapely",
+    "rasterio",
+    "geedim",
 ]
 
 [project.urls]
