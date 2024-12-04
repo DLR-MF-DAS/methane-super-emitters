@@ -20,6 +20,7 @@ def main(input_file, output_file):
 
     lat = rootgrp.groups['instrument']['latitude_center'][:]
     lon = rootgrp.groups['instrument']['longitude_center'][:]
+    time = rootgrp.groups['instrument']['time'][:]
     xch4 = rootgrp.groups['target_product']['xch4_corrected'][:].filled(0)
 
     scanline = rootgrp.groups['instrument']['scanline'][:].filled(-1)
@@ -30,7 +31,7 @@ def main(input_file, output_file):
     lon_matrix = np.full((scanline.max() + 1, ground_pixel.max() + 1), -1000)
     time_matrix = np.full((scanline.max() + 1, ground_pixel.max() + 1), None)
 
-    for sl, gp, m, lt, ln, time in zip(scanline, ground_pixel, xch4, lat, lon, time_matrix):
+    for sl, gp, m, lt, ln, time in zip(scanline, ground_pixel, xch4, lat, lon, time):
         if (sl >= 0) and (gp >= 0):
             methane_matrix[sl][gp] = m
             lat_matrix[sl][gp] = lt
