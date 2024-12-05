@@ -4,10 +4,15 @@ import click
 
 @click.command()
 @click.option('-i', '--input-file', help='Input NPZ file')
-def main(input_file):
+@click.option('--vmin', help='Minimum value for methane concentration')
+@click.option('--vmax', help='Maximum value for methane concentration')
+@click.option('--histogram', help='Show histogram', is_flag=True)
+def main(input_file, vmin, vmax, histogram):
     data = np.load(input_file)
-    import pdb; pdb.set_trace()
-    plt.imshow(data['methane'])
+    if histogram:
+        plt.hist(data['methane'], bins=50)
+        plt.show()
+    plt.imshow(data['methane'], vmin=int(vmin), vmax=int(vmax))
     plt.show()
 
 if __name__ == '__main__':
