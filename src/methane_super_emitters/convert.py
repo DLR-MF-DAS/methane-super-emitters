@@ -10,6 +10,7 @@ import rasterio
 import matplotlib.pyplot as plt
 import click
 import numpy.ma as ma
+import datetime
 
 @click.command()
 @click.option('-i', '--input-file', help='Input netCDF file')
@@ -36,7 +37,9 @@ def main(input_file, output_file):
             methane_matrix[sl][gp] = m
             lat_matrix[sl][gp] = lt
             lon_matrix[sl][gp] = ln
-            time_matrix[sl][gp] = time
+            if time is not None:
+                time_matrix[sl][gp] = datetime.datetime(time.data[0], time.data[1], time.data[2],
+                                                        time.data[3], time.data[4], time.data[5])
 
     np.savez(output_file, methane=methane_matrix, lat=lat_matrix, lon=lon_matrix, time=time_matrix)
 
