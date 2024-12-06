@@ -47,9 +47,12 @@ def main(input_file, matrix_file):
     end_date = time_matrix[lat_matrix != -1000].max()
     rows, cols = methane_matrix.shape
     print(f"Examining {matrix_file}!")
+    any_found = False
     for csv_line in data:
-        if not (start_date <= get_csv_datetime(csv_line) <= end_date):
-            print("SKIP!")
+        if start_date <= get_csv_datetime(csv_line) <= end_date:
+            any_found = True
+    if not any_found:
+        exit()
     for row in range(0, rows, 16):
         for col in range(0, cols, 16):
             if row + 32 < rows and col + 32 < cols:
