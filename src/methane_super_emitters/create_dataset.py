@@ -34,7 +34,7 @@ def main(input_file, matrix_file):
     methane_data = np.load(matrix_file, allow_pickle=True)
     with open(input_file, 'r') as fd:
         data = fd.readlines()[1:]
-    methane_matrix = methane_data['methane']
+    methane_matrix = methane_data['xch4_corrected']
     lat_matrix = methane_data['lat']
     lon_matrix = methane_data['lon']
     time_matrix = methane_data['time']
@@ -48,7 +48,7 @@ def main(input_file, matrix_file):
                 time_window = time_matrix[row:row + 32][:, col:col + 32]
                 for csv_line in data:
                     if check_if_inside(csv_line, lat_window, lon_window, time_window):
-                        print("FOUND!")
+                        print("FOUND! {csv_line} in {matrix_file}")
                     
 if __name__ == '__main__':
     main()
