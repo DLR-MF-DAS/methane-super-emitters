@@ -39,6 +39,7 @@ def main(input_file, matrix_file):
     lon_matrix = methane_data['lon']
     time_matrix = methane_data['time']
     rows, cols = methane_matrix.shape
+    print(f"Examining {matrix_file}!")
     for row in range(0, rows, 16):
         for col in range(0, cols, 16):
             if row + 32 < rows and col + 32 < cols:
@@ -48,7 +49,7 @@ def main(input_file, matrix_file):
                 time_window = time_matrix[row:row + 32][:, col:col + 32]
                 for csv_line in data:
                     if check_if_inside(csv_line, lat_window, lon_window, time_window):
-                        print("FOUND! {csv_line} in {matrix_file}")
+                        print(f"FOUND! {csv_line} in {matrix_file}")
                     
 if __name__ == '__main__':
     main()
