@@ -38,8 +38,8 @@ def main(input_file, matrix_file):
     lat_matrix = methane_data['lat']
     lon_matrix = methane_data['lon']
     time_matrix = methane_data['time']
-    start_date = time_matrix.min()
-    end_date = time_matrix.max()
+    #start_date = time_matrix.min()
+    #end_date = time_matrix.max()
     rows, cols = methane_matrix.shape
     print(f"Examining {matrix_file}!")
     for row in range(0, rows, 16):
