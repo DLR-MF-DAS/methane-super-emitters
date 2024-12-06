@@ -38,10 +38,13 @@ def main(input_file, matrix_file):
     lat_matrix = methane_data['lat']
     lon_matrix = methane_data['lon']
     time_matrix = methane_data['time']
+    start_date = time_matrix.min()
+    end_date = time_matrix.max()
     rows, cols = methane_matrix.shape
     print(f"Examining {matrix_file}!")
     for row in range(0, rows, 16):
         for col in range(0, cols, 16):
+            print(f"Examining patch ({row}, {col})")
             if row + 32 < rows and col + 32 < cols:
                 methane_window = methane_matrix[row:row + 32][:, col:col + 32]
                 lat_window = lat_matrix[row:row + 32][:, col:col + 32]
