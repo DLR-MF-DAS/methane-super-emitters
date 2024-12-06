@@ -1,13 +1,6 @@
 #importing packages
 import numpy as np
-from scipy import interpolate
 from netCDF4 import Dataset
-from shapely.geometry import Point
-import geopandas as gpd
-from geopy.distance import geodesic
-from scipy.interpolate import griddata
-import rasterio
-import matplotlib.pyplot as plt
 import click
 import numpy.ma as ma
 import datetime
@@ -22,26 +15,29 @@ def main(input_file, output_file):
     lat = rootgrp.groups['instrument']['latitude_center'][:]
     lon = rootgrp.groups['instrument']['longitude_center'][:]
     time = rootgrp.groups['instrument']['time'][:]
-    xch4 = rootgrp.groups['target_product']['xch4_corrected'][:].filled(0)
+    xch4 = rootgrp.groups['target_product']['xch4'][:].filled(0)
+    xch4_corrected = rootgrp.groups['target_product']['xch4_corrected'][:].filled(0)
 
     scanline = rootgrp.groups['instrument']['scanline'][:].filled(-1)
     ground_pixel = rootgrp.groups['instrument']['ground_pixel'][:].filled(-1)
 
-    methane_matrix = np.full((scanline.max() + 1, ground_pixel.max() + 1), 0.0)
+    xch4_matrix = np.full((scanline.max() + 1, ground_pixel.max() + 1), 0.0)
+    xch4_corrected_matrix = np.full((scanline.max() + 1, ground_pixel.max() + 1), 0.0)
     lat_matrix = np.full((scanline.max() + 1, ground_pixel.max() + 1), -1000)
     lon_matrix = np.full((scanline.max() + 1, ground_pixel.max() + 1), -1000)
     time_matrix = np.full((scanline.max() + 1, ground_pixel.max() + 1), None)
 
-    for sl, gp, m, lt, ln, time in zip(scanline, ground_pixel, xch4, lat, lon, time):
-        if (sl >= 0) and (gp >= 0):
-            methane_matrix[sl][gp] = m
-            lat_matrix[sl][gp] = lt
-            lon_matrix[sl][gp] = ln
-            if time is not None:
-                time_matrix[sl][gp] = datetime.datetime(time.data[0], time.data[1], time.data[2],
-                                                        time.data[3], time.data[4], time.data[5])
-
-    np.savez(output_file, methane=methane_matrix, lat=lat_matrix, lon=lon_matrix, time=time_matrix)
+    for i in range(scanline.shape[0]):
+        if (scanline[i] >= 0) and (ground_pixel[i] >= 0):
+            xch4_matrix[scanline[i]][ground_pixel[i]] = xch4[i]
+            xch4_corrected_matrix[scanline[i]][ground_pixel[i]] = xch4_corrected[i]
+            lat_matrix[scanline[i]][ground_pixel[i]] = lat[i]
+            lon_matrix[scanline[i]][ground_pixel[i]] = lon[i]
+            if time[i] is not None:
+                time_matrix[scanline[i]][ground_pixel[i]] =\
+                    datetime.datetime(time[i].data[0], time[i].data[1], time[i].data[2],
+                                      time[i].data[3], time[i].data[4], time[i].data[5])
+    np.savez(output_file, xch4=xch4_matrix, xch4_corrected=xch4_corrected_matrix, lat=lat_matrix, lon=lon_matrix, time=time_matrix)
 
 if __name__ == '__main__':
     main()

@@ -10,10 +10,11 @@ import click
 def main(input_file, vmin, vmax, histogram):
     data = np.load(input_file)
     if histogram:
-        plt.hist(data['methane'], bins=50)
+        plt.hist(data['xch4'], bins=50)
         plt.show()
-    plt.imshow(data['methane'], vmin=int(vmin), vmax=int(vmax))
+    plt.imshow(data['xch4'], vmin=int(vmin), vmax=int(vmax))
     plt.show()
 
 if __name__ == '__main__':
     main()
+g
