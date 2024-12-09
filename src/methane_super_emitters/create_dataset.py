@@ -46,7 +46,7 @@ def main(input_file, matrix_file):
     start_date = time_matrix[lat_matrix != -1000].min()
     end_date = time_matrix[lat_matrix != -1000].max()
     rows, cols = methane_matrix.shape
-    print(f"Examining {matrix_file}!")
+    print(f"Examining {matrix_file} - {start_date} to {end_date}")
     any_found = False
     for csv_line in data:
         if start_date <= get_csv_datetime(csv_line) <= end_date:
