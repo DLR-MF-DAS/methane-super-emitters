@@ -68,22 +68,24 @@ def main(input_file, matrix_file, prefix, output_dir):
                                 for col in range(0, cols, 16):
                                     if row + 32 < rows and col + 32 < cols:
                                         methane_window = destriped[0][row:row + 32][:, col: col + 32]
+                                        original = fd['PRODUCT/methane_mixing_ratio_bias_corrected'][:][0][row:row + 32][:, col: col + 32]
                                         lat_window = fd['PRODUCT/latitude'][:][0][row:row + 32][:, col: col + 32]
                                         lon_window = fd['PRODUCT/longitude'][:][0][row:row + 32][:, col: col + 32]
                                         qa_window = fd['PRODUCT/qa_value'][:][0][row:row + 32][:, col:col + 32]
                                         if ((lat_window.min() < float(lat) < lat_window.max()) and
-                                            (lon_window.min() < float(lon) < lon_window.max())):
+                                            (lon_window.min() < float(lon) < lon_window.max()) and
+                                            methane_window.mask.sum() < 0.2 * rows * cols):
                                             print(f"FOUND: {csv_line}")
                                             times = fd['PRODUCT/time_utc'][:][0][row:row + 32]
                                             parsed_time = [datetime.datetime.fromisoformat(time_str[:19]) for time_str in times]
                                             positive_path = os.path.join(output_dir, 'positive', f"{date}_{time}_{lat}_{lon}_{np.random.randint(0, 10000)}.npz")
-                                            np.savez(positive_path, methane=methane_window, lat=lat_window, lon=lon_window, qa=qa_window, time=parsed_time)
+                                            np.savez(positive_path, methane=methane_window, lat=lat_window, lon=lon_window, qa=qa_window, time=parsed_time, mask=original.mask)
                                         else:
-                                            if np.random.random() < 0.001:
+                                            if np.random.random() < 0.001 and methane_window.mask.sum() < 0.2 * rows * cols:
                                                 times = fd['PRODUCT/time_utc'][:][0][row:row + 32]
                                                 parsed_time = [datetime.datetime.fromisoformat(time_str[:19]) for time_str in times]
                                                 negative_path = os.path.join(output_dir, 'negative', f"{uuid.uuid4()}.npz")
-                                                np.savez(negative_path, methane=methane_window, lat=lat_window, lon=lon_window, qa=qa_window, time=parsed_time)
+                                                np.savez(negative_path, methane=methane_window, lat=lat_window, lon=lon_window, qa=qa_window, time=parsed_time, mask=original.mask)
                             
 if __name__ == '__main__':
     main()
