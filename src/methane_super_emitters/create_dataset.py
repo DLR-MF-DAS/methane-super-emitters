@@ -74,14 +74,14 @@ def main(input_file, matrix_file, prefix, output_dir):
                                         qa_window = fd['PRODUCT/qa_value'][:][0][row:row + 32][:, col:col + 32]
                                         if ((lat_window.min() < float(lat) < lat_window.max()) and
                                             (lon_window.min() < float(lon) < lon_window.max()) and
-                                            methane_window.mask.sum() < 0.2 * rows * cols):
+                                            original.mask.sum() < 0.2 * rows * cols):
                                             print(f"FOUND: {csv_line}")
                                             times = fd['PRODUCT/time_utc'][:][0][row:row + 32]
                                             parsed_time = [datetime.datetime.fromisoformat(time_str[:19]) for time_str in times]
                                             positive_path = os.path.join(output_dir, 'positive', f"{date}_{time}_{lat}_{lon}_{np.random.randint(0, 10000)}.npz")
                                             np.savez(positive_path, methane=methane_window, lat=lat_window, lon=lon_window, qa=qa_window, time=parsed_time, mask=original.mask)
                                         else:
-                                            if np.random.random() < 0.001 and methane_window.mask.sum() < 0.2 * rows * cols:
+                                            if np.random.random() < 0.001 and original.mask.sum() < 0.2 * rows * cols:
                                                 times = fd['PRODUCT/time_utc'][:][0][row:row + 32]
                                                 parsed_time = [datetime.datetime.fromisoformat(time_str[:19]) for time_str in times]
                                                 negative_path = os.path.join(output_dir, 'negative', f"{uuid.uuid4()}.npz")
