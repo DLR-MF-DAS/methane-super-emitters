@@ -1,68 +1,89 @@
 import click
 import numpy as np
 import datetime
+import netCDF4
+import os
+import glob
+import math
+import uuid
 
-def check_if_inside(csv_line, lat_window, lon_window, time_window):
-    if np.count_nonzero(lat_window == -1000) == (lat_window.shape[0] * lat_window.shape[1]):
-        return False
-    csv_datetime = get_csv_datetime(csv_line)
-    csv_line = csv_line.strip().split(',')
-    csv_lat = float(csv_line[2])
-    csv_lon = float(csv_line[3])
-    mask = lat_window != -1000
-    min_datetime = time_window[mask].min()
-    max_datetime = time_window[mask].max()
-    min_lat = lat_window[mask].min()
-    max_lat = lat_window[mask].max()
-    min_lon = lon_window[mask].min()
-    max_lon = lon_window[mask].max()
-    return ((min_datetime <= csv_datetime <= max_datetime) and
-            (min_lat <= csv_lat <= max_lat) and
-            (min_lon <= csv_lon <= max_lon))
-
-def get_csv_datetime(csv_line):
-    csv_line = csv_line.strip().split(',')
-    csv_year = int(csv_line[0][0:4])
-    csv_month = int(csv_line[0][4:6])
-    csv_day = int(csv_line[0][6:8])
-    csv_time = csv_line[1].split(':')
-    csv_hour = int(csv_time[0])
-    csv_minute = int(csv_time[1])
-    csv_second = int(csv_time[2])
-    csv_datetime = datetime.datetime(csv_year, csv_month, csv_day, csv_hour, csv_minute, csv_second)
-    return csv_datetime
+def destripe(fd):
+    ch4 = fd['/PRODUCT/methane_mixing_ratio'][:]
+    ch4corr = fd['/PRODUCT/methane_mixing_ratio_bias_corrected'][:]
+    ch4corrdestrip = ch4corr.copy() * np.nan
+    n = ch4corr.shape[1]
+    # get the number of columns
+    m = ch4corr.shape[2]
+    back = np.zeros((1, n, m)) * np.nan
+    for i in range(m):
+        # define half window size
+        ws = 7
+        if i < ws:
+            st = 0
+            sp = i + ws
+        elif m - i < ws:
+            st = i - ws
+            sp = m - 1
+        else:
+            st = i - ws
+            sp = i + ws
+        back[0, :, i] = np.nanmedian(ch4corr[0, :, st:sp], axis=1)
+    this = ch4corr - back
+    stripes = np.zeros((1, n, m)) * np.nan
+    for j in range(n):
+        ws = 60
+        if j < ws:
+            st = 0
+            sp = j + ws
+        elif n - j < ws:
+            st = j - ws
+            sp = n - 1
+        else:
+            st = j - ws
+            sp = j + ws
+        stripes[0, j, :] = np.nanmedian(this[0,st:sp,:], axis=0)
+    ch4corrdestrip = this - stripes
+    return ch4corrdestrip
 
 @click.command()
 @click.option('-i', '--input-file', help='Input CSV with super-emitter locations')
 @click.option('-m', '--matrix-file', help='Input NPZ file with methane data from TROPOMI')
-def main(input_file, matrix_file):
-    methane_data = np.load(matrix_file, allow_pickle=True)
+@click.option('-p', '--prefix', help='Folder with TROPOMI data', default='/dss/dsstbyfs03/pn56su/pn56su-dss-0022/Sentinel-5p/L2/CH4/2021/')
+@click.option('-o', '--output_dir', help='Output folder')
+def main(input_file, matrix_file, prefix, output_dir):
     with open(input_file, 'r') as fd:
         data = fd.readlines()[1:]
-    methane_matrix = methane_data['xch4_corrected']
-    lat_matrix = methane_data['lat']
-    lon_matrix = methane_data['lon']
-    time_matrix = methane_data['time']
-    start_date = time_matrix[lat_matrix != -1000].min()
-    end_date = time_matrix[lat_matrix != -1000].max()
-    rows, cols = methane_matrix.shape
-    print(f"Examining {matrix_file} - {start_date} to {end_date}")
-    any_found = False
-    for csv_line in data:
-        if start_date <= get_csv_datetime(csv_line) <= end_date:
-            any_found = True
-    if not any_found:
-        exit()
-    for row in range(0, rows, 16):
-        for col in range(0, cols, 16):
-            if row + 32 < rows and col + 32 < cols:
-                methane_window = methane_matrix[row:row + 32][:, col:col + 32]
-                lat_window = lat_matrix[row:row + 32][:, col:col + 32]
-                lon_window = lon_matrix[row:row + 32][:, col:col + 32]
-                time_window = time_matrix[row:row + 32][:, col:col + 32]
-                for csv_line in data:
-                    if check_if_inside(csv_line, lat_window, lon_window, time_window):
-                        print(f"FOUND! {csv_line} in {matrix_file}")
-                    
+    for month_path in glob.glob(os.path.join(prefix, '*')):
+        for day_path in glob.glob(os.path.join(month_path, '*')):
+            for file_path in glob.glob(os.path.join(day_path, '*.nc')):
+                print(f"ANALIZING: {file_path}")
+                with netCDF4.Dataset(file_path, 'r') as fd:
+                    destriped = destripe(fd)
+                    for csv_line in data:
+                        date, time, lat, lon, _, _, _ = csv_line.split(',')
+                        if date[-4:-2] == month_path[-2:] and date[-2:] == day_path[-2:]:
+                            rows = destriped.shape[1]
+                            cols = destriped.shape[2]
+                            for row in range(0, rows, 16):
+                                for col in range(0, cols, 16):
+                                    if row + 32 < rows and col + 32 < cols:
+                                        methane_window = destriped[0][row:row + 32][:, col: col + 32]
+                                        lat_window = fd['PRODUCT/latitude'][:][0][row:row + 32][:, col: col + 32]
+                                        lon_window = fd['PRODUCT/longitude'][:][0][row:row + 32][:, col: col + 32]
+                                        qa_window = fd['PRODUCT/qa_value'][:][0][row:row + 32][:, col:col + 32]
+                                        if ((lat_window.min() < float(lat) < lat_window.max()) and
+                                            (lon_window.min() < float(lon) < lon_window.max())):
+                                            print(f"FOUND: {csv_line}")
+                                            times = fd['PRODUCT/time_utc'][:][0][row:row + 32]
+                                            parsed_time = [datetime.datetime.fromisoformat(time_str[:19]) for time_str in times]
+                                            positive_path = os.path.join(output_dir, 'positive', f"{date}_{time}_{lat}_{lon}_{np.random.randint(0, 10000)}.npz")
+                                            np.savez(positive_path, methane=methane_window, lat=lat_window, lon=lon_window, qa=qa_window, time=parsed_time)
+                                        else:
+                                            if np.random.random() < 0.001:
+                                                times = fd['PRODUCT/time_utc'][:][0][row:row + 32]
+                                                parsed_time = [datetime.datetime.fromisoformat(time_str[:19]) for time_str in times]
+                                                negative_path = os.path.join(output_dir, 'negative', f"{uuid.uuid4()}.npz")
+                                                np.savez(negative_path, methane=methane_window, lat=lat_window, lon=lon_window, qa=qa_window, time=parsed_time)
+                            
 if __name__ == '__main__':
     main()
