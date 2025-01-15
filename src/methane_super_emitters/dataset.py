@@ -1,3 +1,4 @@
+import torch
 from torch.utils.data import DataLoader, Dataset
 import os
 import glob
@@ -19,4 +20,4 @@ class TROPOMISuperEmitterDataset(Dataset):
             label = 1
         else:
             label = 0
-        return data['methane'], label
+        return torch.from_numpy(data['methane']), label
