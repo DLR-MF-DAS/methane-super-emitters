@@ -45,51 +45,49 @@ def destripe(fd):
     ch4corrdestrip = this - stripes
     return ch4corrdestrip
 
+def parse_date(date_str, time_str):
+    return datetime.datetime.strptime(date_str + time_str, '%Y%m%d%H:%M:%S')
+
+def process_tropomi_file(file_path, input_file):
+    print(f"ANALYZING: {file_path}")
+    with open(input_file, 'r') as csv_fd:
+        csv_data = csv_fd.readlines()[1:]
+    with netCDF4.Dataset(file_path, 'r') as fd:
+        destriped = destripe(fd)
+        for csv_line in csv_data:
+            date, time, lat, lon, _, _, _ = csv_line.split(',')
+            if date[-4:-2] == month_path[-2:] and date[-2:] == day_path[-2:]:
+                rows = destriped.shape[1]
+                cols = destriped.shape[2]
+                for row in range(0, rows, 16):
+                    for col in range(0, cols, 16):
+                        if row + 32 < rows and col + 32 < cols:
+                            methane_window = destriped[0][row:row + 32][:, col: col + 32]
+                            original = fd['PRODUCT/methane_mixing_ratio_bias_corrected'][:][0][row:row + 32][:, col: col + 32]
+                            lat_window = fd['PRODUCT/latitude'][:][0][row:row + 32][:, col: col + 32]
+                            lon_window = fd['PRODUCT/longitude'][:][0][row:row + 32][:, col: col + 32]
+                            qa_window = fd['PRODUCT/qa_value'][:][0][row:row + 32][:, col:col + 32]
+                            times = fd['PRODUCT/time_utc'][:][0][row:row + 32]
+                            parsed_time = [datetime.datetime.fromisoformat(time_str[:19]) for time_str in times]
+                            if ((lat_window.min() < float(lat) < lat_window.max()) and
+                                (lon_window.min() < float(lon) < lon_window.max()) and
+                                (min(parsed_time) <= parse_date(date, time)  <= max(parsed_time)) and
+                                original.mask.sum() < 0.2 * 32 * 32):
+                                print(f"FOUND: {csv_line}")
+                                positive_path = os.path.join(output_dir, 'positive', f"{date}_{time}_{lat}_{lon}_{np.random.randint(0, 10000):04d}.npz")
+                                np.savez(positive_path, methane=methane_window, lat=lat_window,
+                                         lon=lon_window, qa=qa_window, time=parsed_time,
+                                         mask=original.mask, non_destriped=original)
+
 @click.command()
 @click.option('-i', '--input-file', help='Input CSV with super-emitter locations')
-@click.option('-m', '--matrix-file', help='Input NPZ file with methane data from TROPOMI')
 @click.option('-p', '--prefix', help='Folder with TROPOMI data', default='/dss/dsstbyfs03/pn56su/pn56su-dss-0022/Sentinel-5p/L2/CH4/2021/')
 @click.option('-o', '--output_dir', help='Output folder')
-def main(input_file, matrix_file, prefix, output_dir):
-    with open(input_file, 'r') as fd:
-        data = fd.readlines()[1:]
+def main(input_file, prefix, output_dir):
     for month_path in glob.glob(os.path.join(prefix, '*')):
         for day_path in glob.glob(os.path.join(month_path, '*')):
             for file_path in glob.glob(os.path.join(day_path, '*.nc')):
-                print(f"ANALIZING: {file_path}")
-                with netCDF4.Dataset(file_path, 'r') as fd:
-                    destriped = destripe(fd)
-                    for csv_line in data:
-                        date, time, lat, lon, _, _, _ = csv_line.split(',')
-                        if date[-4:-2] == month_path[-2:] and date[-2:] == day_path[-2:]:
-                            rows = destriped.shape[1]
-                            cols = destriped.shape[2]
-                            for row in range(0, rows, 16):
-                                for col in range(0, cols, 16):
-                                    if row + 32 < rows and col + 32 < cols:
-                                        methane_window = destriped[0][row:row + 32][:, col: col + 32]
-                                        original = fd['PRODUCT/methane_mixing_ratio_bias_corrected'][:][0][row:row + 32][:, col: col + 32]
-                                        lat_window = fd['PRODUCT/latitude'][:][0][row:row + 32][:, col: col + 32]
-                                        lon_window = fd['PRODUCT/longitude'][:][0][row:row + 32][:, col: col + 32]
-                                        qa_window = fd['PRODUCT/qa_value'][:][0][row:row + 32][:, col:col + 32]
-                                        if ((lat_window.min() < float(lat) < lat_window.max()) and
-                                            (lon_window.min() < float(lon) < lon_window.max()) and
-                                            original.mask.sum() < 0.2 * 32 * 32):
-                                            print(f"FOUND: {csv_line}")
-                                            times = fd['PRODUCT/time_utc'][:][0][row:row + 32]
-                                            parsed_time = [datetime.datetime.fromisoformat(time_str[:19]) for time_str in times]
-                                            positive_path = os.path.join(output_dir, 'positive', f"{date}_{time}_{lat}_{lon}_{np.random.randint(0, 10000)}.npz")
-                                            np.savez(positive_path, methane=methane_window, lat=lat_window,
-                                                     lon=lon_window, qa=qa_window, time=parsed_time,
-                                                     mask=original.mask, non_destriped=original)
-                                        else:
-                                            if np.random.random() < 0.01 and original.mask.sum() < 0.2 * 32 * 32:
-                                                times = fd['PRODUCT/time_utc'][:][0][row:row + 32]
-                                                parsed_time = [datetime.datetime.fromisoformat(time_str[:19]) for time_str in times]
-                                                negative_path = os.path.join(output_dir, 'negative', f"{uuid.uuid4()}.npz")
-                                                np.savez(negative_path, methane=methane_window, lat=lat_window,
-                                                         lon=lon_window, qa=qa_window, time=parsed_time,
-                                                         mask=original.mask, non_destriped=original)
-                            
+                process_tropomi_file(file_path, input_file)
+
 if __name__ == '__main__':
     main()
