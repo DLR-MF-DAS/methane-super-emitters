@@ -25,6 +25,8 @@ dependencies = [
     "shapely",
     "rasterio",
     "geedim",
+    "joblib",
+    "lightning"
 ]
 
 [project.urls]
