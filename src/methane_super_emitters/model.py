@@ -15,7 +15,7 @@ class SuperEmitterDetector(L.LightningModule):
         self.fc2 = nn.Linear(64, 64)
         self.fc3 = nn.Linear(64, 2)
         self.softmax = nn.Softmax()
-        self.accuracy = torchmetrics.Accuracy()
+        self.accuracy = torchmetrics.BinaryAccuracy()
 
     def forward(self, x):
         out = self.bn(self.rel(self.cnv(x)))
