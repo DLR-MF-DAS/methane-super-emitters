@@ -2,7 +2,7 @@ import lightning as L
 from torch.utils.data import random_split, DataLoader
 from methane_super_emitters.dataset import TROPOMISuperEmitterDataset
 
-class TROPOMIDataModule(L.LightningDataModule):
+class TROPOMISuperEmitterDataModule(L.LightningDataModule):
     def __init__(self, data_dir, batch_size=32):
         super().__init__()
         self.data_dir = data_dir
