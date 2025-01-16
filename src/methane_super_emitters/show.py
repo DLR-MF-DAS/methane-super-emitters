@@ -17,4 +17,3 @@ def main(input_file, vmin, vmax, histogram):
 
 if __name__ == '__main__':
     main()
-g
