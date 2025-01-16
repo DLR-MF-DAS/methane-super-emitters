@@ -1,4 +1,5 @@
 import lightning as L
+import torchmetrics
 import torch
 import torch.nn as nn
 
@@ -14,7 +15,7 @@ class SuperEmitterDetector(L.LightningModule):
         self.fc2 = nn.Linear(64, 64)
         self.fc3 = nn.Linear(64, 2)
         self.softmax = nn.Softmax()
-        self.accuracy = L.metrics.Accuracy()
+        self.accuracy = torchmetrics.Accuracy()
 
     def forward(self, x):
         out = self.bn(self.rel(self.cnv(x)))
