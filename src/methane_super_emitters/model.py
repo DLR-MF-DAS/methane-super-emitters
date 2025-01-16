@@ -39,7 +39,6 @@ class SuperEmitterDetector(L.LightningModule):
         label = y.view(-1)
         out = self(img)
         loss = self.loss_fn(out, label)
-        self.log('train_loss', loss)
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -51,7 +50,6 @@ class SuperEmitterDetector(L.LightningModule):
         out = nn.Softmax(-1)(out)
         logits = torch.argmax(out, dim=1)
         accu = self.accuracy(logits, label)
-        self.log('valid_loss', loss)
-        self.log('train_acc_step', accu)
+        self.log('accuracy', accu)
         return loss, accu
         
