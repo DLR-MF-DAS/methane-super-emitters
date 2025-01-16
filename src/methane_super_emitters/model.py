@@ -13,8 +13,8 @@ class SuperEmitterDetector(L.LightningModule):
         self.flat = nn.Flatten()
         self.fc1 = nn.Linear(128, 64)
         self.fc2 = nn.Linear(64, 64)
-        self.fc3 = nn.Linear(64, 2)
-        self.softmax = nn.Softmax()
+        self.fc3 = nn.Linear(64, 1)
+        self.sigmoid = nn.Sigmoid()
         self.accuracy = torchmetrics.classification.BinaryAccuracy()
 
     def forward(self, x):
@@ -23,14 +23,12 @@ class SuperEmitterDetector(L.LightningModule):
         out = self.rel(self.fc1(out))
         out = self.rel(self.fc2(out))
         out = self.fc3(out)
+        out = self.sigmoid(out)
         return out
-
-    def loss_fn(self, out, target):
-        return nn.CrossEntropyLoss()(out.view(-1, 2), target)
 
     def configure_optimizers(self):
         LR = 1e-3
-        optimizer = torch.optim.AdamW(self.parameters(), lr=LR)
+        optimizer = torch.optim.Adam(self.parameters(), lr=LR)
         return optimizer
 
     def training_step(self, batch, batch_idx):
@@ -38,7 +36,7 @@ class SuperEmitterDetector(L.LightningModule):
         img = x.view(-1, 1, 32, 32)
         label = y.view(-1)
         out = self(img)
-        loss = self.loss_fn(out, label)
+        loss = torch.nn.functional.binary_cross_entropy(out, y)
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -46,10 +44,11 @@ class SuperEmitterDetector(L.LightningModule):
         img = x.view(-1, 1, 32, 32)
         label = y.view(-1)
         out = self(img)
-        loss = self.loss_fn(out, label)
-        out = nn.Softmax(-1)(out)
-        logits = torch.argmax(out, dim=1)
-        accu = self.accuracy(logits, label)
+        loss = torch.nn.functional.binary_cross_entropy(out, y)
+        #out = nn.Softmax(-1)(out)
+        #logits = torch.argmax(out, dim=1)
+        out = torch.where(out > 0.5, 1.0, 0.0)
+        accu = self.accuracy(out, y)
         self.log('accuracy', accu)
         return loss, accu
         

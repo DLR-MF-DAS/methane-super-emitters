@@ -22,4 +22,4 @@ class TROPOMISuperEmitterDataset(Dataset):
             label = [0]
         m = data['methane']
         m[data['mask']] = 0.0
-        return torch.tensor(m, dtype=torch.float), torch.tensor(label, dtype=torch.long)
+        return torch.tensor(m, dtype=torch.float), torch.tensor(label, dtype=torch.float)

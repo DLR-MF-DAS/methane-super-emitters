@@ -5,10 +5,11 @@ from methane_super_emitters.datamodule import TROPOMISuperEmitterDataModule
 
 @click.command()
 @click.option('-i', '--input-dir', help='Data directory')
-def train_model(input_dir):
+@click.option('-m', '--max-epochs', help='Maximum number of epochs', default=1)
+def train_model(input_dir, max_epochs):
     model = SuperEmitterDetector()
     datamodule = TROPOMISuperEmitterDataModule(input_dir)
-    trainer = L.Trainer(max_epochs=1000)
+    trainer = L.Trainer(max_epochs=max_epochs)
     trainer.fit(model=model, datamodule=datamodule)
 
 if __name__ == '__main__':
