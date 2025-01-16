@@ -1,6 +1,7 @@
 import pytest
 import lightning as L
 from methane_super_emitters.model import SuperEmitterDetector
+from methane_super_emitters.datamodule import TROPOMISuperEmitterDataModule
 
 def test_model():
     model = SuperEmitterDetector()
