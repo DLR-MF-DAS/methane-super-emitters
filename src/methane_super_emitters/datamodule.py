@@ -7,7 +7,7 @@ class TROPOMIDataModule(L.LightningDataModule):
         super().__init__()
         self.data_dir = data_dir
         self.batch_size = batch_size
-        self.dataset = TROPOMOISuperEmitterDataset(self.data_dir)
+        self.dataset = TROPOMISuperEmitterDataset(self.data_dir)
         self.train_set, self.val_set, self.test_set =\
             random_split(self.dataset, [0.7, 0.15, 0.15])
 
