@@ -6,13 +6,13 @@ import torch.nn as nn
 class SuperEmitterDetector(L.LightningModule):
     def __init__(self):
         super().__init__()
-        self.cnv = nn.Conv2d(1, 32, 5, 4)
+        self.cnv = nn.Conv2d(1, 64, 5, 4)
         self.rel = nn.ReLU()
-        self.bn = nn.BatchNorm2d(32)
+        self.bn = nn.BatchNorm2d(64)
         self.mxpool = nn.MaxPool2d(4)
         self.flat = nn.Flatten()
-        self.fc1 = nn.Linear(32, 16)
-        self.fc2 = nn.Linear(16, 1)
+        self.fc1 = nn.Linear(64, 32)
+        self.fc2 = nn.Linear(32, 1)
         self.sigmoid = nn.Sigmoid()
         self.accuracy = torchmetrics.classification.BinaryAccuracy()
 
