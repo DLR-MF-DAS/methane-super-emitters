@@ -2,13 +2,15 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 import os
 import glob
+import random
 import numpy as np
 
 class TROPOMISuperEmitterDataset(Dataset):
     def __init__(self, data_dir):
         self.data_dir = data_dir
         self.positive = glob.glob(os.path.join(data_dir, 'positive', '*.npz'))
-        self.negative = glob.glob(os.path.join(data_dir, 'negative', '*.npz'))
+        negative_samples = glob.glob(os.path.join(data_dir, 'negative', '*.npz'))
+        self.negative = [random.choice(negative_samples) for _ in range(len(self.positive))]
         self.all_samples = self.positive + self.negative
 
     def __len__(self):

@@ -77,7 +77,7 @@ def process_tropomi_file(file_path, month_path, day_path, output_dir, input_file
                                 original.mask.sum() < 0.2 * 32 * 32):
                                 print(f"FOUND: {csv_line}")
                                 emitter = True
-                        if not emitter and np.random.random() < 0.001:
+                        if not emitter and np.random.random() < 0.01 and original.mask.sum() < 0.2 * 32 * 32:
                             negative_path = os.path.join(output_dir, 'negative', f"{uuid.uuid4()}.npz")
                             np.savez(negative_path, methane=methane_window, lat=lat_window,
                                      lon=lon_window, qa=qa_window, time=parsed_time,
