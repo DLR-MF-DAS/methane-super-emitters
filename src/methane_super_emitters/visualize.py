@@ -18,7 +18,7 @@ def main(input_dir):
         mask = data['mask']
         m[mask] = 0.0
         ax = fig.add_subplot(8, 8, row * 8 + col + 1)
-        ax.imshow(m)
+        ax.imshow(m, vmin=-30, vmax=30)
         ax.set_xticks([])
         ax.set_yticks([])
         ax.set_aspect('equal')
