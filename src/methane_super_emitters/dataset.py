@@ -12,7 +12,7 @@ class TROPOMISuperEmitterDataset(Dataset):
         self.negative = []
         self.positive_filenames = glob.glob(os.path.join(data_dir, 'positive', '*.npz'))
         negative_filenames = glob.glob(os.path.join(data_dir, 'negative', '*.npz'))
-        self.negative_filenames = negative_filenames[:len(self.positive)]
+        self.negative_filenames = negative_filenames[:len(self.positive_filenames)]
         for filename in self.positive_filenames:
             self.positive.append(np.load(filename))
         for filename in self.negative_filenames:
