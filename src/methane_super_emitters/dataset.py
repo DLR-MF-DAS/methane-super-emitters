@@ -29,5 +29,5 @@ class TROPOMISuperEmitterDataset(Dataset):
         else:
             label = 0
         m = data['methane']
-        m[data['mask']] = 0.0
+        m[data['mask']] = np.median(m)
         return torch.tensor([m], dtype=torch.float), torch.tensor(label, dtype=torch.float)
