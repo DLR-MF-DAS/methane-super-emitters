@@ -6,23 +6,29 @@ import torch.nn as nn
 class SuperEmitterDetector(L.LightningModule):
     def __init__(self):
         super().__init__()
-        self.cnv = nn.Conv2d(1, 128, 5, 4)
-        self.rel = nn.ReLU()
-        self.bn = nn.BatchNorm2d(128)
-        self.mxpool = nn.MaxPool2d(4)
-        self.flat = nn.Flatten()
-        self.fc1 = nn.Linear(128, 64)
-        self.fc2 = nn.Linear(64, 1)
-        self.sigmoid = nn.Sigmoid()
-        self.accuracy = torchmetrics.classification.BinaryAccuracy()
+        self.conv_layers = nn.Sequential(
+            nn.Conv2d(1, 16, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Conv2d(16, 32, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=1),
+        )
+        self.fc_layers = nn.Sequential(
+            nn.Linear(3136, 128),
+            nn.ReLU(),
+            nn.Dropout(0.5),
+            nn.Linear(128, 1),
+        )
 
     def forward(self, x):
-        out = self.bn(self.rel(self.cnv(x)))
-        out = self.flat(self.mxpool(out))
-        out = self.rel(self.fc1(out))
-        out = self.fc2(out)
-        out = self.sigmoid(out)
-        return out
+        out = self.conv_layers(x)
+        out = out.view(out.size(0), -1)
+        out = self.fc_layers(out)
+        return torch.sigmoid(out)
 
     def configure_optimizers(self):
         LR = 1e-3
@@ -30,24 +36,22 @@ class SuperEmitterDetector(L.LightningModule):
         return optimizer
 
     def training_step(self, batch, batch_idx):
-        x, y = batch
-        img = x.view(-1, 1, 32, 32)
-        label = y.view(-1)
-        out = self(img)
-        loss = torch.nn.functional.binary_cross_entropy(out, y)
-        out = torch.where(out > 0.5, 1.0, 0.0)
-        accu = self.accuracy(out, y)
-        self.log('train_accu', accu)
+        images, labels = batch
+        outputs = self(images).squeeze()
+        loss = nn.functional.binary_cross_entropy(outputs, labels.float())
+        self.log('train_loss', loss)
         return loss
 
     def validation_step(self, batch, batch_idx):
-        x, y = batch
-        img = x.view(-1, 1, 32, 32)
-        label = y.view(-1)
-        out = self(img)
-        loss = torch.nn.functional.binary_cross_entropy(out, y)
-        out = torch.where(out > 0.5, 1.0, 0.0)
-        accu = self.accuracy(out, y)
-        self.log('val_accu', accu)
-        return loss, accu
-        
+        images, labels = batch
+        outputs = self(images).squeeze()
+        loss = nn.functional.binary_cross_entropy(outputs, labels.float())
+        acc = ((outputs > 0.5).int() == labels).float().mean()
+        self.log('val_loss', loss)
+        self.log('val_acc', acc)
+
+    def test_step(self, batch, batch_idx):
+        images, labels = batch
+        outputs = self(images).squeeze()
+        acc = ((outputs > 0.5).int() == labels).float().mean()
+        self.log('test_acc', acc)

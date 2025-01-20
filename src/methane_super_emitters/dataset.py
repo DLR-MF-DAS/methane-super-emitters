@@ -25,9 +25,9 @@ class TROPOMISuperEmitterDataset(Dataset):
     def __getitem__(self, idx):
         data = self.all_samples[idx]
         if idx < len(self.positive):
-            label = [1]
+            label = 1
         else:
-            label = [0]
+            label = 0
         m = data['methane']
         m[data['mask']] = 0.0
-        return torch.tensor(m, dtype=torch.float), torch.tensor(label, dtype=torch.float)
+        return torch.tensor([m], dtype=torch.float), torch.tensor(label, dtype=torch.float)
