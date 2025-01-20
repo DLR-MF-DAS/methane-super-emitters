@@ -15,7 +15,7 @@ class TROPOMISuperEmitterDataModule(L.LightningDataModule):
         pass
 
     def train_dataloader(self):
-        return DataLoader(self.train_set, batch_size=self.batch_size, shuffle=False)
+        return DataLoader(self.train_set, batch_size=self.batch_size, shuffle=True)
 
     def val_dataloader(self):
         return DataLoader(self.val_set, batch_size=self.batch_size, shuffle=False)

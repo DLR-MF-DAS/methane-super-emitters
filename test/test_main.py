@@ -8,3 +8,4 @@ def test_model():
     datamodule = TROPOMISuperEmitterDataModule('./data/dataset')
     trainer = L.Trainer(max_epochs=1)
     trainer.fit(model=model, datamodule=datamodule)
+    trainer.test(model=model, datamodule=datamodule)

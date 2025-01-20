@@ -11,6 +11,7 @@ def train_model(input_dir, max_epochs):
     datamodule = TROPOMISuperEmitterDataModule(input_dir)
     trainer = L.Trainer(max_epochs=max_epochs)
     trainer.fit(model=model, datamodule=datamodule)
+    trainer.test(model=model, datamodule=datamodule)
 
 if __name__ == '__main__':
     train_model()
