@@ -26,7 +26,8 @@ dependencies = [
     "rasterio",
     "geedim",
     "joblib",
-    "lightning"
+    "lightning",
+    "cdsapi>=0.7.2",
 ]
 
 [project.urls]
