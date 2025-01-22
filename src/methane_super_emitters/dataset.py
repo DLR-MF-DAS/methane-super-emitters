@@ -30,4 +30,7 @@ class TROPOMISuperEmitterDataset(Dataset):
             label = 0
         m = data['methane']
         m[data['mask']] = np.median(m)
-        return torch.tensor([m], dtype=torch.float), torch.tensor(label, dtype=torch.float)
+        u = data['u']
+        v = data['v']
+        sample = np.array([m, u, v])
+        return torch.tensor(sample, dtype=torch.float), torch.tensor(label, dtype=torch.float)
