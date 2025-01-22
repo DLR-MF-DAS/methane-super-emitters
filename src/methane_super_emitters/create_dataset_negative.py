@@ -7,47 +7,7 @@ import glob
 import math
 import uuid
 from joblib import Parallel, delayed
-
-def destripe(fd):
-    ch4 = fd['/PRODUCT/methane_mixing_ratio'][:]
-    ch4corr = fd['/PRODUCT/methane_mixing_ratio_bias_corrected'][:]
-    ch4corrdestrip = ch4corr.copy() * np.nan
-    n = ch4corr.shape[1]
-    # get the number of columns
-    m = ch4corr.shape[2]
-    back = np.zeros((1, n, m)) * np.nan
-    for i in range(m):
-        # define half window size
-        ws = 7
-        if i < ws:
-            st = 0
-            sp = i + ws
-        elif m - i < ws:
-            st = i - ws
-            sp = m - 1
-        else:
-            st = i - ws
-            sp = i + ws
-        back[0, :, i] = np.nanmedian(ch4corr[0, :, st:sp], axis=1)
-    this = ch4corr - back
-    stripes = np.zeros((1, n, m)) * np.nan
-    for j in range(n):
-        ws = 60
-        if j < ws:
-            st = 0
-            sp = j + ws
-        elif n - j < ws:
-            st = j - ws
-            sp = n - 1
-        else:
-            st = j - ws
-            sp = j + ws
-        stripes[0, j, :] = np.nanmedian(this[0,st:sp,:], axis=0)
-    ch4corrdestrip = this - stripes
-    return ch4corrdestrip
-
-def parse_date(date_str, time_str):
-    return datetime.datetime.strptime(date_str + time_str, '%Y%m%d%H:%M:%S')
+from methane_super_emitters.create_dataset import destripe, parse_date
 
 def process_tropomi_file(file_path, month_path, day_path, output_dir, input_file):
     print(f"ANALYZING: {file_path}")
@@ -66,6 +26,8 @@ def process_tropomi_file(file_path, month_path, day_path, output_dir, input_file
                         lat_window = fd['PRODUCT/latitude'][:][0][row:row + 32][:, col: col + 32]
                         lon_window = fd['PRODUCT/longitude'][:][0][row:row + 32][:, col: col + 32]
                         qa_window = fd['PRODUCT/qa_value'][:][0][row:row + 32][:, col:col + 32]
+                        u10_window = fd['PRODUCT/SUPPORT_DATA/INPUT_DATA/eastward_wind'][:][0][row:row + 32][:, col:col + 32]
+                        v10_window = fd['PRODUCT/SUPPORT_DATA/INPUT_DATA/northward_wind'][:][0][row:row + 32][:, col:col + 32]
                         times = fd['PRODUCT/time_utc'][:][0][row:row + 32]
                         parsed_time = [datetime.datetime.fromisoformat(time_str[:19]) for time_str in times]
                         emitter = False
@@ -81,7 +43,8 @@ def process_tropomi_file(file_path, month_path, day_path, output_dir, input_file
                             negative_path = os.path.join(output_dir, 'negative', f"{uuid.uuid4()}.npz")
                             np.savez(negative_path, methane=methane_window, lat=lat_window,
                                      lon=lon_window, qa=qa_window, time=parsed_time,
-                                     mask=original.mask, non_destriped=original)
+                                     mask=original.mask, non_destriped=original,
+                                     u10=u10_window, v10=v10_window)
     except OSError:
         pass
 

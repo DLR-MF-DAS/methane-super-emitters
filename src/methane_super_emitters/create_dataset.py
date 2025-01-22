@@ -69,6 +69,8 @@ def process_tropomi_file(file_path, month_path, day_path, output_dir, input_file
                                 lat_window = fd['PRODUCT/latitude'][:][0][row:row + 32][:, col: col + 32]
                                 lon_window = fd['PRODUCT/longitude'][:][0][row:row + 32][:, col: col + 32]
                                 qa_window = fd['PRODUCT/qa_value'][:][0][row:row + 32][:, col:col + 32]
+                                u10_window = fd['PRODUCT/SUPPORT_DATA/INPUT_DATA/eastward_wind'][:][0][row:row + 32][:, col:col + 32]
+                                v10_window = fd['PRODUCT/SUPPORT_DATA/INPUT_DATA/northward_wind'][:][0][row:row + 32][:, col:col + 32]
                                 times = fd['PRODUCT/time_utc'][:][0][row:row + 32]
                                 parsed_time = [datetime.datetime.fromisoformat(time_str[:19]) for time_str in times]
                                 if ((lat_window.min() < float(lat) < lat_window.max()) and
@@ -79,7 +81,8 @@ def process_tropomi_file(file_path, month_path, day_path, output_dir, input_file
                                     positive_path = os.path.join(output_dir, 'positive', f"{date}_{time}_{lat}_{lon}_{np.random.randint(0, 10000):04d}.npz")
                                     np.savez(positive_path, methane=methane_window, lat=lat_window,
                                              lon=lon_window, qa=qa_window, time=parsed_time,
-                                             mask=original.mask, non_destriped=original)
+                                             mask=original.mask, non_destriped=original,
+                                             u10=u10_window, v10=v10_window)
     except OSError:
         pass
 
