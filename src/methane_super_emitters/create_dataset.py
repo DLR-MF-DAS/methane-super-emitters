@@ -11,11 +11,13 @@ from joblib import Parallel, delayed
 def destripe(fd):
     ch4 = fd['/PRODUCT/methane_mixing_ratio'][:]
     ch4corr = fd['/PRODUCT/methane_mixing_ratio_bias_corrected'][:]
+    ch4corr[ch4corr>1E20]=np.nan
     ch4corrdestrip = ch4corr.copy() * np.nan
-    n = ch4corr.shape[1]
+    # get the number of rows
+    n = ch4corr.shape[2]
     # get the number of columns
-    m = ch4corr.shape[2]
-    back = np.zeros((1, n, m)) * np.nan
+    m = ch4corr.shape[1]
+    back = np.zeros((m, n)) * np.nan
     for i in range(m):
         # define half window size
         ws = 7
@@ -28,9 +30,9 @@ def destripe(fd):
         else:
             st = i - ws
             sp = i + ws
-        back[0, :, i] = np.nanmedian(ch4corr[0, :, st:sp], axis=1)
-    this = ch4corr - back
-    stripes = np.zeros((1, n, m)) * np.nan
+        back[i,:] = np.nanmedian(ch4corr[0, st:sp,:], axis=0)
+    this = ch4corr[0,:,:] - back
+    stripes = np.zeros((m,n)) * np.nan
     for j in range(n):
         ws = 60
         if j < ws:
@@ -42,8 +44,8 @@ def destripe(fd):
         else:
             st = j - ws
             sp = j + ws
-        stripes[0, j, :] = np.nanmedian(this[0,st:sp,:], axis=0)
-    ch4corrdestrip = this - stripes
+        stripes[:, j] = np.nanmedian(this[:,st:sp], axis=1)
+    ch4corrdestrip[0,:,:] = ch4corr[0,:,:] - stripes
     return ch4corrdestrip
 
 def parse_date(date_str, time_str):
