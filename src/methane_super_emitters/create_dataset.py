@@ -14,10 +14,10 @@ def destripe(fd):
     ch4corr[ch4corr>1E20]=np.nan
     ch4corrdestrip = ch4corr.copy() * np.nan
     # get the number of rows
-    n = ch4corr.shape[2]
+    n = ch4corr.shape[1]
     # get the number of columns
-    m = ch4corr.shape[1]
-    back = np.zeros((m, n)) * np.nan
+    m = ch4corr.shape[2]
+    back = np.zeros((n,m)) * np.nan
     for i in range(m):
         # define half window size
         ws = 7
@@ -30,9 +30,9 @@ def destripe(fd):
         else:
             st = i - ws
             sp = i + ws
-        back[i,:] = np.nanmedian(ch4corr[0, st:sp,:], axis=0)
+        back[:,i] = np.nanmedian(ch4corr[0, :, st:sp], axis=1)
     this = ch4corr[0,:,:] - back
-    stripes = np.zeros((m,n)) * np.nan
+    stripes = np.zeros((n, m)) * np.nan
     for j in range(n):
         ws = 60
         if j < ws:
@@ -44,7 +44,7 @@ def destripe(fd):
         else:
             st = j - ws
             sp = j + ws
-        stripes[:, j] = np.nanmedian(this[:,st:sp], axis=1)
+        stripes[j, :] = np.nanmedian(this[st:sp, :], axis=0)
     ch4corrdestrip[0,:,:] = ch4corr[0,:,:] - stripes
     return ch4corrdestrip
 
