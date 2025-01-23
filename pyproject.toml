@@ -27,6 +27,7 @@ dependencies = [
     "geedim",
     "joblib",
     "lightning",
+    "torchvision",
     "cdsapi>=0.7.2",
 ]
 
