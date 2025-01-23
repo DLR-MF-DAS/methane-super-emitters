@@ -13,12 +13,12 @@ def main(input_dir, output_dir):
         plt.figure(figsize=(8, 8))
         data = np.load(input_file)
         m = data['methane']
-        m[data['mask']] = np.median(m)
-        plt.imshow(m, vmin=-30, vmax=30)
+        m[data['mask']] = np.nanmedian(m)
+        plt.imshow(m)
         x = np.arange(data['methane'].shape[1])
         y = np.arange(data['methane'].shape[0])
         xv, yv = np.meshgrid(x, y)
-        plt.quiver(xv, yv, data['u'], data['v'])
+        plt.quiver(xv, yv, data['u10'], data['v10'])
         stem = Path(input_file).stem
         plt.savefig(os.path.join(output_dir, stem + ".png"))
 
