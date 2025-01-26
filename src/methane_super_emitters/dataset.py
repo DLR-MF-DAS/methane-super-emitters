@@ -19,7 +19,8 @@ class TROPOMISuperEmitterDataset(Dataset):
             m[data['mask']] = np.nanmedian(m)
             u = data['u10']
             v = data['v10']
-            sample = np.array([m, u, v])
+            qa = (data['qa'] > 0.4).astype(np.float64)
+            sample = np.array([m, u, v, qa])
             self.samples.append((sample, 1.0))
         for filename in self.negative_filenames:
             data = np.load(filename)
@@ -27,7 +28,8 @@ class TROPOMISuperEmitterDataset(Dataset):
             m[data['mask']] = np.nanmedian(m)
             u = data['u10']
             v = data['v10']
-            sample = np.array([m, u, v])
+            qa = (data['qa'] > 0.4).astype(np.float64)
+            sample = np.array([m, u, v, qa])
             self.samples.append((sample, 0.0))
         self.means = np.array(self.mean())
         self.stds = np.array(self.std())
@@ -35,7 +37,8 @@ class TROPOMISuperEmitterDataset(Dataset):
             img, label = sample
             img_ = np.array([(img[0] - self.means[0]) / self.stds[0],
                              (img[1] - self.means[1]) / self.stds[1],
-                             (img[2] - self.means[2]) / self.stds[2]])
+                             (img[2] - self.means[2]) / self.stds[2],
+                             img[3]])
             self.samples[index] = (img_, label)
 
     def mean(self):
@@ -57,6 +60,17 @@ class TROPOMISuperEmitterDataset(Dataset):
             std_u += img[1].std() ** 2
             std_v += img[2].std() ** 2
         return float(np.sqrt(std_m / len(self))), float(np.sqrt(std_u / len(self))), float(np.sqrt(std_v / len(self)))
+
+    def normalize(self, patch):
+        m = patch['methane']
+        m[patch['mask']] = np.nanmedian(m)
+        m = (m - self.means[0]) / self.stds[0]
+        u10 = patch['u10']
+        u10 = (u10 - self.means[1]) / self.stds[1]
+        v10 = patch['v10']
+        v10 = (v10 - self.means[2]) / self.stds[2]
+        qa = (patch['qa'] > 0.4).astype(np.float64)
+        return np.array([m, u10, v10, qa])
 
     def __len__(self):
         return len(self.samples)
