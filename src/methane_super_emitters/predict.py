@@ -49,7 +49,7 @@ def predict_from_tropomi_file(file_path, output_path, model, dataset, threshold)
         for patch in patch_iterator(file_path):
             if predict(model, dataset, patch) > threshold:
                 print(f"Found emitter in {file_path}")
-                np.savez(os.path.join(output_path, str(uuid.uuid4()) + '.npz'))
+                np.savez(os.path.join(output_path, str(uuid.uuid4()) + '.npz'), **patch)
     except OSError:
         pass
 
@@ -69,6 +69,7 @@ def predict(model, dataset, patch):
 def main(checkpoint, dataset, input_dir, output_dir, n_jobs, threshold):
     model = SuperEmitterDetector.load_from_checkpoint(checkpoint)
     dataset = TROPOMISuperEmitterDataset(dataset)
+    dataset.unload()
     for month_path in glob.glob(os.path.join(input_dir, '*')):
         for day_path in glob.glob(os.path.join(month_path, '*')):
             Parallel(n_jobs=n_jobs)(delayed(predict_from_tropomi_file)(file_path, output_dir, model, dataset, threshold) for file_path in glob.glob(os.path.join(day_path, '*.nc')))

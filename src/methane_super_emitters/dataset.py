@@ -41,6 +41,11 @@ class TROPOMISuperEmitterDataset(Dataset):
                              img[3]])
             self.samples[index] = (img_, label)
 
+    def unload(self):
+        self.samples = []
+        import gc
+        gc.collect()
+
     def mean(self):
         mean_m = 0.0
         mean_u = 0.0
