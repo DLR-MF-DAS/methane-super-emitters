@@ -62,7 +62,7 @@ class TROPOMISuperEmitterDataset(Dataset):
         return float(np.sqrt(std_m / len(self))), float(np.sqrt(std_u / len(self))), float(np.sqrt(std_v / len(self)))
 
     def normalize(self, patch):
-        m = patch['methane']
+        m = np.array(patch['methane'])
         m[patch['mask']] = np.nanmedian(m)
         m = (m - self.means[0]) / self.stds[0]
         u10 = patch['u10']
