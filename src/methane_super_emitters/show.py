@@ -15,6 +15,7 @@ def main(input_dir, output_dir):
         m = data['methane']
         m[data['mask']] = np.nanmedian(m)
         plt.imshow(m)
+        plt.colorbar()
         x = np.arange(data['methane'].shape[1])
         y = np.arange(data['methane'].shape[0])
         xv, yv = np.meshgrid(x, y)
