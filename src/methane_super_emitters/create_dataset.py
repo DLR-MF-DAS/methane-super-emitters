@@ -7,49 +7,7 @@ import glob
 import math
 import uuid
 from joblib import Parallel, delayed
-
-def destripe(fd):
-    ch4 = fd['/PRODUCT/methane_mixing_ratio'][:]
-    ch4corr = fd['/PRODUCT/methane_mixing_ratio_bias_corrected'][:]
-    ch4corr[ch4corr>1E20]=np.nan
-    ch4corrdestrip = ch4corr.copy() * np.nan
-    # get the number of rows
-    n = ch4corr.shape[1]
-    # get the number of columns
-    m = ch4corr.shape[2]
-    back = np.zeros((n,m)) * np.nan
-    for i in range(m):
-        # define half window size
-        ws = 7
-        if i < ws:
-            st = 0
-            sp = i + ws
-        elif m - i < ws:
-            st = i - ws
-            sp = m - 1
-        else:
-            st = i - ws
-            sp = i + ws
-        back[:,i] = np.nanmedian(ch4corr[0, :, st:sp], axis=1)
-    this = ch4corr[0,:,:] - back
-    stripes = np.zeros((n, m)) * np.nan
-    for j in range(n):
-        ws = 60
-        if j < ws:
-            st = 0
-            sp = j + ws
-        elif n - j < ws:
-            st = j - ws
-            sp = n - 1
-        else:
-            st = j - ws
-            sp = j + ws
-        stripes[j, :] = np.nanmedian(this[st:sp, :], axis=0)
-    ch4corrdestrip[0,:,:] = ch4corr[0,:,:] - stripes
-    return ch4corrdestrip
-
-def parse_date(date_str, time_str):
-    return datetime.datetime.strptime(date_str + time_str, '%Y%m%d%H:%M:%S')
+from methane_super_emitters.utils import destripe, parse_date
 
 def process_tropomi_file(file_path, month_path, day_path, output_dir, input_file):
     print(f"ANALYZING: {file_path}")

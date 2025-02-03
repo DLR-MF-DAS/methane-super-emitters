@@ -7,7 +7,7 @@ import glob
 import math
 import uuid
 from joblib import Parallel, delayed
-from methane_super_emitters.create_dataset import destripe, parse_date
+from methane_super_emitters.utils import destripe, parse_date
 
 def process_tropomi_file(file_path, month_path, day_path, output_dir, input_file):
     print(f"ANALYZING: {file_path}")
