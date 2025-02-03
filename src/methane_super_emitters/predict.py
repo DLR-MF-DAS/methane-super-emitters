@@ -10,43 +10,12 @@ from joblib import Parallel, delayed
 import datetime
 from methane_super_emitters.model import SuperEmitterDetector
 from methane_super_emitters.dataset import TROPOMISuperEmitterDataset
-from methane_super_emitters.create_dataset import destripe, parse_date
-
-def patch_iterator(file_path):
-    with netCDF4.Dataset(file_path, 'r') as fd:
-        destriped = destripe(fd)
-        rows = destriped.shape[1]
-        cols = destriped.shape[2]
-        for row in range(0, rows, 16):
-            for col in range(0, cols, 16):
-                if row + 32 < rows and col + 32 < cols:
-                    methane_window = destriped[0][row:row + 32][:, col: col + 32]
-                    original = fd['PRODUCT/methane_mixing_ratio_bias_corrected'][:][0][row:row + 32][:, col: col + 32]
-                    lat_window = fd['PRODUCT/latitude'][:][0][row:row + 32][:, col: col + 32]
-                    lon_window = fd['PRODUCT/longitude'][:][0][row:row + 32][:, col: col + 32]
-                    qa_window = fd['PRODUCT/qa_value'][:][0][row:row + 32][:, col:col + 32]
-                    u10_window = fd['PRODUCT/SUPPORT_DATA/INPUT_DATA/eastward_wind'][:][0][row:row + 32][:, col:col + 32]
-                    v10_window = fd['PRODUCT/SUPPORT_DATA/INPUT_DATA/northward_wind'][:][0][row:row + 32][:, col:col + 32]
-                    times = fd['PRODUCT/time_utc'][:][0][row:row + 32]
-                    parsed_time = [datetime.datetime.fromisoformat(time_str[:19]) for time_str in times]
-                    if original.mask.sum() < 0.2 * 32 * 32:
-                        yield {
-                            'methane': methane_window,
-                            'lat': lat_window,
-                            'lon': lon_window,
-                            'qa': qa_window,
-                            'time': parsed_time,
-                            'mask': original.mask,
-                            'non_destriped': original,
-                            'u10': u10_window,
-                            'v10': v10_window
-                        }
-
+from methane_super_emitters.utils import destripe, parse_date, patch_generator
 
 def predict_from_tropomi_file(file_path, output_path, model, dataset, threshold):
     print(f"ANALYZING {file_path}")
     try:
-        for patch in patch_iterator(file_path):
+        for patch in patch_generator(file_path):
             if predict(model, dataset, patch) > threshold:
                 print(f"Found emitter in {file_path}")
                 np.savez(os.path.join(output_path, str(uuid.uuid4()) + '.npz'), **patch)
