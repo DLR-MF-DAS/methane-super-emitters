@@ -3,6 +3,8 @@ import os
 import random
 import shutil
 import numpy as np
+import netCDF4
+import datetime
 
 def sample_files(glob_pattern, output_dir, n):
     """A small utility function to sample files from a directory at random.
@@ -125,10 +127,10 @@ def patch_generator(file_path):
                     sa_std_window = fd['PRODUCT/SUPPORT_DATA/INPUT_DATA/surface_altitude_precision'][:][0][row:row + 32][:, col:col + 32]
                     cloud_fraction_window = fd['PRODUCT/SUPPORT_DATA/INPUT_DATA/cloud_fraction_VIIRS_SWIR_IFOV'][:][0][row:row + 32][:, col:col + 32]
                     cirrus_reflectance_window = fd['PRODUCT/SUPPORT_DATA/INPUT_DATA/reflectance_cirrus_VIIRS_SWIR'][:][0][row:row + 32][:, col:col + 32]
-                    methane_ratio_std_window = fd['PRODUCT/SUPPORT_DATA/DETAILED_RESULTS/methane_ratio_weak_strong_standard_deviation'][:][0][row:row + 32][:, col:col + 32]
+                    methane_ratio_std_window = fd['PRODUCT/SUPPORT_DATA/INPUT_DATA/methane_ratio_weak_strong_standard_deviation'][:][0][row:row + 32][:, col:col + 32]
                     methane_precision_window = fd['PRODUCT/methane_mixing_ratio_precision'][:][0][row:row + 32][:, col:col + 32]
                     surface_albedo_window = fd['PRODUCT/SUPPORT_DATA/DETAILED_RESULTS/surface_albedo_SWIR'][:][0][row:row + 32][:, col:col + 32]
-                    surface_albedo_precision_window = fd['PRODUCT/SUPPORT_DATA/DETAILED_RESULTS/surface_albedo_precision_SWIR'][:][0][row:row + 32][:, col:col + 32]
+                    surface_albedo_precision_window = fd['PRODUCT/SUPPORT_DATA/DETAILED_RESULTS/surface_albedo_SWIR_precision'][:][0][row:row + 32][:, col:col + 32]
                     aerosol_optical_thickness_window = fd['PRODUCT/SUPPORT_DATA/DETAILED_RESULTS/aerosol_optical_thickness_SWIR'][:][0][row:row + 32][:, col:col + 32]
                     times = fd['PRODUCT/time_utc'][:][0][row:row + 32]
                     parsed_time = [datetime.datetime.fromisoformat(time_str[:19]) for time_str in times]
@@ -145,7 +147,7 @@ def patch_generator(file_path):
                             'v10': v10_window,
                             'sza': np.cos(sza_window),
                             'vza': np.cos(vza_window),
-                            'scattering_angle': scatering_angle,
+                            'scattering_angle': scattering_angle,
                             'sa_std': sa_std_window,
                             'cloud_fraction': cloud_fraction_window,
                             'cirrus_reflectance': cirrus_reflectance_window,
