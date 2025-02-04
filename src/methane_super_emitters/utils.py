@@ -133,7 +133,10 @@ def patch_generator(file_path):
                     surface_albedo_precision_window = fd['PRODUCT/SUPPORT_DATA/DETAILED_RESULTS/surface_albedo_SWIR_precision'][:][0][row:row + 32][:, col:col + 32]
                     aerosol_optical_thickness_window = fd['PRODUCT/SUPPORT_DATA/DETAILED_RESULTS/aerosol_optical_thickness_SWIR'][:][0][row:row + 32][:, col:col + 32]
                     times = fd['PRODUCT/time_utc'][:][0][row:row + 32]
-                    parsed_time = [datetime.datetime.fromisoformat(time_str[:19]) for time_str in times]
+                    try:
+                        parsed_time = [datetime.datetime.fromisoformat(time_str[:19]) for time_str in times]
+                    except ValueError:
+                        continue
                     if original.mask.sum() < 0.2 * 32 * 32:
                         yield {
                             'methane': methane_window,
@@ -145,8 +148,8 @@ def patch_generator(file_path):
                             'non_destriped': original,
                             'u10': u10_window,
                             'v10': v10_window,
-                            'sza': np.cos(sza_window),
-                            'vza': np.cos(vza_window),
+                            'sza': np.cos(np.radians(sza_window)),
+                            'vza': np.cos(np.radians(vza_window)),
                             'scattering_angle': scattering_angle,
                             'sa_std': sa_std_window,
                             'cloud_fraction': cloud_fraction_window,
