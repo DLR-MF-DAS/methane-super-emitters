@@ -5,6 +5,25 @@ import shutil
 import numpy as np
 import netCDF4
 import datetime
+import geedim
+
+def s2_download(npz_file, output_dir):
+    """Download a Sentinel-2 image corresponding to a TROPOMI patch.
+
+    Parameters
+    ----------
+    npz_file: str
+        A patch from a TROPOMI file used for training or inference in our model.
+    output_dir: str
+        Output directory to store the Sentinel-2 data.
+    """
+    data = np.load(npz_file, allow_pickle=True)
+    lat = data['lat']
+    lon = data['lon']
+    lat_min = min(lat)
+    lat_max = max(lat)
+    lon_min = min(lon)
+    lon_max = max(lon)
 
 def sample_files(glob_pattern, output_dir, n):
     """A small utility function to sample files from a directory at random.
@@ -22,7 +41,7 @@ def sample_files(glob_pattern, output_dir, n):
         shutil.copy(path, output_dir)
 
 def destripe(fd):
-    """A destriping algorithm for tropoomi data.
+    """A destriping algorithm for TROPOMI data.
 
     Parameters
     ----------
