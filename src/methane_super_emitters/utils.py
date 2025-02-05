@@ -38,15 +38,15 @@ def s2_download(npz_file, output_dir):
     }
     coll = geedim.MaskedCollection.from_name('COPERNICUS/S2_HARMONIZED')
     date = min(data['time'])
-    start_date = date - relativedelta(months=1)
-    end_date = date + relativedelta(months=1)
+    start_date = date - relativedelta(weeks=2)
+    end_date = date + relativedelta(weeks=2)
     try:
-        coll = coll.search(start_date=start_date, end_date=end_date, region=polygon, cloudless_portion=0.5,)
+        coll = coll.search(start_date=start_date, end_date=end_date, region=polygon, cloudless_portion=0.5)
         comp_im = coll.composite(method='mosaic', region=polygon)
         stem = pathlib.Path(npz_file).stem
-        output_file = os.path.join(output_dir, f"{stem}_s2.tif")
-        comp_im.download(output_file, region=polygon, crs="EPSG:4326", scale=10, overwrite=True,
-                         bands=["B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B8A", "B9", "B10", "B11", "B12"])
+        output_file = os.path.join(output_dir, f"{stem}.tif")
+        comp_im.download(output_file, region=polygon, crs="EPSG:4326", scale=20, overwrite=True,
+                         bands=["B4", "B3", "B2"])
     except ValueError:
         logging.warning(f"No S2 data find matching the query constructed from {npz_file}")
 
@@ -62,7 +62,7 @@ def s2_preview_png(tiff_file, output_dir):
     """
     stem = pathlib.Path(tiff_file).stem
     with rasterio.open(tiff_file, 'r') as src:
-        rgb = src.read([3, 2, 1])
+        rgb = src.read([1, 2, 3])
         rgb = (255 * (rgb / np.max(rgb))).astype(np.uint8)
         rgb_image = reshape_as_image(rgb)
         Image.fromarray(rgb_image).save(os.path.join(output_dir, f"{stem}.png"))
