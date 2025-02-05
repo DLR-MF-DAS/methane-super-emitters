@@ -8,6 +8,9 @@ import datetime
 import geedim
 import logging
 import pathlib
+import rasterio
+from rasterio.plot import reshape_as_image
+from PIL import Image
 from dateutil.relativedelta import relativedelta
 
 def s2_download(npz_file, output_dir):
@@ -45,6 +48,23 @@ def s2_download(npz_file, output_dir):
                          bands=["B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B8A", "B9", "B10", "B11", "B12"])
     except ValueError:
         logging.warning(f"No S2 data find matching the query constructed from {npz_file}")
+
+def s2_preview_png(tiff_file, output_dir):
+    """Create a PNG preview of a S2 GeoTIFF file.
+    
+    Parameters
+    ----------
+    tiff_file: str
+        A GeoTIFF with the Sentinel-2 scene.
+    output_dir: str
+        Output directory for the result.
+    """
+    stem = pathlib.Path(tiff_file).stem
+    with rasterio.open(tiff_file) as src:
+        rgb = src.read([3, 2, 1])
+        rgb = (255 * (rgb / np.max(rgb))).astype(np.uint8)
+        rgb_image = reshape_as_image(rgb)
+        Image.fromarray(rgb_image).save(os.path.join(output_dir, f"{stem}.png"))
 
 def sample_files(glob_pattern, output_dir, n):
     """A small utility function to sample files from a directory at random.
