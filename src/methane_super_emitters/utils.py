@@ -126,10 +126,12 @@ def patch_generator(file_path):
         for row in range(0, rows, 16):
             for col in range(0, cols, 16):
                 if row + 32 < rows and col + 32 < cols:
-                    methane_window = destriped[0][row:row + 32][:, col: col + 32]
-                    original = fd['PRODUCT/methane_mixing_ratio_bias_corrected'][:][0][row:row + 32][:, col: col + 32]
+                    methane_window = destriped[0][row:row + 32][:, col:col + 32]
+                    original = fd['PRODUCT/methane_mixing_ratio_bias_corrected'][:][0][row:row + 32][:, col:col + 32]
                     lat_window = fd['PRODUCT/latitude'][:][0][row:row + 32][:, col: col + 32]
                     lon_window = fd['PRODUCT/longitude'][:][0][row:row + 32][:, col: col + 32]
+                    lat_bounds_window = fd['PRODUCT/SUPPORT_DATA/GEOLOCATIONS/latitude_bounds'][:][0][row:row + 32][:, col:col + 32]
+                    lon_bounds_window = fd['PRODUCT/SUPPORT_DATA/GEOLOCATIONS/longitude_bounds'][:][0][row:row + 32][:, col:col + 32]
                     qa_window = fd['PRODUCT/qa_value'][:][0][row:row + 32][:, col:col + 32]
                     u10_window = fd['PRODUCT/SUPPORT_DATA/INPUT_DATA/eastward_wind'][:][0][row:row + 32][:, col:col + 32]
                     v10_window = fd['PRODUCT/SUPPORT_DATA/INPUT_DATA/northward_wind'][:][0][row:row + 32][:, col:col + 32]
@@ -161,6 +163,8 @@ def patch_generator(file_path):
                             'methane': methane_window,
                             'lat': lat_window,
                             'lon': lon_window,
+                            'lat_bounds': lat_bounds_window,
+                            'lon_bounds': lon_bounds_window,
                             'qa': qa_window,
                             'time': parsed_time,
                             'mask': original.mask,
