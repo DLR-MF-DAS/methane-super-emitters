@@ -6,6 +6,9 @@ import numpy as np
 import netCDF4
 import datetime
 import geedim
+import logging
+import pathlib
+from dateutil.relativedelta import relativedelta
 
 def s2_download(npz_file, output_dir):
     """Download a Sentinel-2 image corresponding to a TROPOMI patch.
@@ -17,13 +20,31 @@ def s2_download(npz_file, output_dir):
     output_dir: str
         Output directory to store the Sentinel-2 data.
     """
+    geedim.Initialize()
     data = np.load(npz_file, allow_pickle=True)
-    lat = data['lat']
-    lon = data['lon']
-    lat_min = min(lat)
-    lat_max = max(lat)
-    lon_min = min(lon)
-    lon_max = max(lon)
+    lat = data['lat_bounds']
+    lon = data['lon_bounds']
+    lat_min = float(lat.min())
+    lat_max = float(lat.max())
+    lon_min = float(lon.min())
+    lon_max = float(lon.max())
+    polygon = {
+        "type": "Polygon",
+        "coordinates": [[[lat_min, lon_min], [lat_min, lon_max], [lat_max, lon_max], [lat_max, lon_min], [lat_min, lon_min]]],
+    }
+    coll = geedim.MaskedCollection.from_name('COPERNICUS/S2_HARMONIZED')
+    date = min(data['time'])
+    start_date = date - relativedelta(months=1)
+    end_date = date + relativedelta(months=1)
+    try:
+        coll = coll.search(start_date=start_date, end_date=end_date, region=polygon, cloudless_portion=0.5,)
+        comp_im = coll.composite(method='mosaic', region=polygon)
+        stem = pathlib.Path(npz_file).stem
+        output_file = os.path.join(output_dir, f"{stem}_s2.tif")
+        comp_im.download(output_file, region=polygon, crs="EPSG:4326", scale=10, overwrite=True,
+                         bands=["B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B8A", "B9", "B10", "B11", "B12"])
+    except ValueError:
+        logging.warning(f"No S2 data find matching the query constructed from {npz_file}")
 
 def sample_files(glob_pattern, output_dir, n):
     """A small utility function to sample files from a directory at random.
