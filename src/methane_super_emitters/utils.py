@@ -10,6 +10,7 @@ import logging
 import pathlib
 import rasterio
 from rasterio.plot import reshape_as_image
+from rasterio.transform import from_origin
 from PIL import Image
 from dateutil.relativedelta import relativedelta
 
@@ -60,11 +61,39 @@ def s2_preview_png(tiff_file, output_dir):
         Output directory for the result.
     """
     stem = pathlib.Path(tiff_file).stem
-    with rasterio.open(tiff_file) as src:
+    with rasterio.open(tiff_file, 'r') as src:
         rgb = src.read([3, 2, 1])
         rgb = (255 * (rgb / np.max(rgb))).astype(np.uint8)
         rgb_image = reshape_as_image(rgb)
         Image.fromarray(rgb_image).save(os.path.join(output_dir, f"{stem}.png"))
+
+def npz_to_geotiff(npz_file, output_dir):
+    """Store methane concentrations in a GeoTIFF for preview.
+
+    Parameters
+    ----------
+    npz_file: str
+        An NPZ file as used for training and inference.
+    output_dir: str
+        Output directory for the result.
+    """
+    stem = pathlib.Path(npz_file).stem
+    data = np.load(npz_file)
+    ch4 = data['methane']
+    mask = data['mask']
+    lat = data['lat_bounds']
+    lon = data['lon_bounds']
+    lat_res = (lat.max() - lat.min()) / lat.shape[0]
+    lon_res = (lon.max() - lon.min()) / lat.shape[1]
+    transform = from_origin(lon.min(), lat.max(), lon_res, lat_res)
+    ch4[mask] = -9999
+    with rasterio.open(
+            os.path.join(output_dir, f"{stem}_ch4.tif"),
+            'w', driver='GTiff', height=ch4.shape[0],
+            width = ch4.shape[1], count=1, dtype=np.float32,
+            crs="EPSG:4326", transform=transform, nodata=-9999
+    ) as dst:
+        dst.write(ch4, 1)
 
 def sample_files(glob_pattern, output_dir, n):
     """A small utility function to sample files from a directory at random.
