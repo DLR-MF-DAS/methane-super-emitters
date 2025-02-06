@@ -16,6 +16,7 @@ def process_tropomi_file(file_path, month_path, day_path, output_dir, input_file
     try:
         for patch in patch_generator(file_path):
             emitter = False
+            location = np.zeros((32, 32))
             for csv_line in csv_data:
                 date, time, lat, lon, _, _, _ = csv_line.split(',')
                 if ((patch['lat'].min() < float(lat) < patch['lat'].max()) and
@@ -24,12 +25,21 @@ def process_tropomi_file(file_path, month_path, day_path, output_dir, input_file
                     patch['mask'].sum() < 0.2 * 32 * 32):
                     print(f"FOUND: {csv_line}")
                     emitter = True
+                    # Locate the pixel with the emitter
+                    for row in range(patch.shape[0]):
+                        for col in range(patch.shape[1]):
+                            min_lat = patch['lat_bounds'][row][col].min()
+                            max_lat = patch['lat_bounds'][row][col].max()
+                            min_lon = patch['lon_bounds'][row][col].min()
+                            max_lon = patch['lon_bounds'][row][col].max()
+                            if min_lat < float(lat) < max_lat and min_lon < float(lon) < max_lon:
+                                location[row][col] = 1
                     if not negative:
                         positive_path = os.path.join(output_dir, 'positive', f"{date}_{time}_{lat}_{lon}_{np.random.randint(0, 10000):04d}.npz")
-                        np.savez_compressed(positive_path, **patch)
+                        np.savez_compressed(positive_path, location=location, **patch)
             if negative and not emitter and np.random.random() < 0.02 and patch['mask'].sum() < 0.2 * 32 * 32:
                 negative_path = os.path.join(output_dir, 'negative', f"{uuid.uuid4()}.npz")
-                np.savez_compressed(negative_path, **patch)
+                np.savez_compressed(negative_path, location=location, **patch)
     except OSError:
         pass
 
