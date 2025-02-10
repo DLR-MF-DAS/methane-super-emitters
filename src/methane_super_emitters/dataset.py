@@ -5,9 +5,10 @@ import glob
 import random
 import numpy as np
 from torchvision.transforms import Compose, ToTensor, Normalize
+from methane_super_emitters.dataset_stats import normalize
 
 class TROPOMISuperEmitterDataset(Dataset):
-    def __init__(self, data_dir):
+    def __init__(self, data_dir, fields=['methane', 'qa', 'u10', 'v10']):
         self.data_dir = data_dir
         self.samples = []
         self.positive_filenames = glob.glob(os.path.join(data_dir, 'positive', '*.npz'))

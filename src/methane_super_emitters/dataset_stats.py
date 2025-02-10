@@ -117,6 +117,31 @@ DATASET_STATS = {
     }
 }
 
+def normalize(data, fields):
+    """Normalize the selected fields in the dataset.
+
+    Parameters
+    ----------
+    data: dict
+        A dictionary with the full dataset data from an .NPZ file
+    fields: list
+        A list with field names
+
+    Returns
+    -------
+    NumPy array
+    """
+    result = []
+    for field in fields:
+        if field == 'methane':
+            m = np.array(data['methane'])
+            m[data['mask']] = np.nanmedian(m)
+            m = (m - DATASET_STATS['methane']['mean']) / DATASET_STATS['methane']['std']
+            results.append(m)
+        else:
+            results.append(np.array(data[field]))
+    return np.array(result)
+
 @click.command()
 @click.option('-i', '--input-dir', help='Directory with the full dataset')
 def main(input_dir):
