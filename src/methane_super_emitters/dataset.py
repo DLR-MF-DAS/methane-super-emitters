@@ -16,67 +16,17 @@ class TROPOMISuperEmitterDataset(Dataset):
         self.negative_filenames = negative_filenames[:len(self.positive_filenames)]
         for filename in self.positive_filenames:
             data = np.load(filename)
-            m = data['methane']
-            m[data['mask']] = np.nanmedian(m)
-            u = data['u10']
-            v = data['v10']
-            qa = (data['qa'] > 0.4).astype(np.float64)
-            sample = np.array([m, u, v, qa])
-            self.samples.append((sample, 1.0))
+            self.samples.append((normalize(data, fields), 1.0))
         for filename in self.negative_filenames:
             data = np.load(filename)
-            m = data['methane']
-            m[data['mask']] = np.nanmedian(m)
-            u = data['u10']
-            v = data['v10']
-            qa = (data['qa'] > 0.4).astype(np.float64)
-            sample = np.array([m, u, v, qa])
-            self.samples.append((sample, 0.0))
-        self.means = np.array(self.mean())
-        self.stds = np.array(self.std())
-        for index, sample in enumerate(self.samples):
-            img, label = sample
-            img_ = np.array([(img[0] - self.means[0]) / self.stds[0],
-                             (img[1] - self.means[1]) / self.stds[1],
-                             (img[2] - self.means[2]) / self.stds[2],
-                             img[3]])
-            self.samples[index] = (img_, label)
+            self.samples.append((normalize(data, fields), 0.0))
 
     def unload(self):
+        """Make garbage collector collect the data.
+        """
         self.samples = []
         import gc
         gc.collect()
-
-    def mean(self):
-        mean_m = 0.0
-        mean_u = 0.0
-        mean_v = 0.0
-        for img, label in self.samples:
-            mean_m += img[0].mean()
-            mean_u += img[1].mean()
-            mean_v += img[2].mean()
-        return float(mean_m / len(self)), float(mean_u / len(self)), float(mean_v / len(self))
-
-    def std(self):
-        std_m = 0.0
-        std_u = 0.0
-        std_v = 0.0
-        for img, label in self.samples:
-            std_m += img[0].std() ** 2
-            std_u += img[1].std() ** 2
-            std_v += img[2].std() ** 2
-        return float(np.sqrt(std_m / len(self))), float(np.sqrt(std_u / len(self))), float(np.sqrt(std_v / len(self)))
-
-    def normalize(self, patch):
-        m = np.array(patch['methane'])
-        m[patch['mask']] = np.nanmedian(m)
-        m = (m - self.means[0]) / self.stds[0]
-        u10 = patch['u10']
-        u10 = (u10 - self.means[1]) / self.stds[1]
-        v10 = patch['v10']
-        v10 = (v10 - self.means[2]) / self.stds[2]
-        qa = (patch['qa'] > 0.4).astype(np.float64)
-        return np.array([m, u10, v10, qa])
 
     def __len__(self):
         return len(self.samples)
