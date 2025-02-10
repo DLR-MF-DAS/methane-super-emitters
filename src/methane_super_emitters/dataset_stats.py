@@ -7,7 +7,6 @@ import glob
 from collections import defaultdict
 import numpy as np
 import json
-from methane_super_emitters.dataset import TROPOMISuperEmitterDataset
 
 DATASET_STATS = {
     "methane": {
@@ -136,10 +135,21 @@ def normalize(data, fields):
         if field == 'methane':
             m = np.array(data['methane'])
             m[data['mask']] = np.nanmedian(m)
-            m = (m - DATASET_STATS['methane']['mean']) / DATASET_STATS['methane']['std']
-            results.append(m)
+            a = DATASET_STATS['methane']['min']
+            b = DATASET_STATS['methane']['max']
+            m = (m - a) / (b - a)
+            result.append(m)
+        elif field == 'qa':
+            qa = np.array(data['qa'])
+            qa = (qa > 0.5).astype(np.float64)
+            result.append(qa)
+        elif field in ['u10', 'v10']:
+            x = np.array(data[field])
+            a = DATASET_STATS[field]['min']
+            b = DATASET_STATS[field]['max']
+            result.append((x - a) / (b - a))
         else:
-            results.append(np.array(data[field]))
+            result.append(np.array(data[field]))
     return np.array(result)
 
 @click.command()
@@ -157,10 +167,6 @@ def main(input_dir):
                 results[key].append(data[key])
     for key in results:
         results[key] = np.array(results[key]).astype(np.float128)
-        upper = np.percentile(results[key], 99)
-        lower = np.percentile(results[key], 1)
-        results[key][np.argwhere(results[key] > upper)] = np.nan
-        results[key][np.argwhere(results[key] < lower)] = np.nan
     stats = {}
     for key in results:
         stats[key] = {

@@ -4,10 +4,10 @@ import torch
 import torch.nn as nn
 
 class SuperEmitterDetector(L.LightningModule):
-    def __init__(self):
+    def __init__(self, fields):
         super().__init__()
         self.conv_layers = nn.Sequential(
-            nn.Conv2d(4, 16, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(len(fields), 16, kernel_size=3, stride=1, padding=1),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2),
             nn.Conv2d(16, 32, kernel_size=3, stride=1, padding=1),
