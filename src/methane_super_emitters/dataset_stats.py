@@ -24,18 +24,18 @@ DATASET_STATS = {
         "max": 1.0
     },
     "u10": {
-        "mean": -0.3737712936343934,
-        "median": -0.2512122094631195,
-        "std": 2.5397220760580796,
-        "min": -7.993372440338135,
-        "max": 7.180738925933838
+        "mean": 2.9203019451826925e+31,
+        "median": -0.23290672898292542,
+        "std": 1.7062537320392988e+34,
+        "min": -16.78030014038086,
+        "max": 9.969209968386869e+36
     },
     "v10": {
-        "mean": -0.20653207072280394,
-        "median": -0.3010627329349518,
-        "std": 2.50340158368457,
-        "min": -7.131891250610352,
-        "max": 7.727571487426758
+        "mean": 2.9203019451826925e+31,
+        "median": -0.3439149558544159,
+        "std": 1.7062537320392988e+34,
+        "min": -16.52522850036621,
+        "max": 9.969209968386869e+36
     },
     "sza": {
         "mean": 0.692825452684085,
@@ -132,12 +132,12 @@ def normalize(data, fields):
     """
     result = []
     for field in fields:
-        if field == 'methane':
-            m = np.array(data['methane'])
+        if field in ['methane']:
+            m = np.array(data[field])
             m[data['mask']] = np.nanmedian(m)
-            a = DATASET_STATS['methane']['min']
-            b = DATASET_STATS['methane']['max']
-            m = (m - a) / (b - a)
+            mean = DATASET_STATS[field]['mean']
+            std = DATASET_STATS[field]['std']
+            m = (m - mean) / std
             result.append(m)
         elif field == 'qa':
             qa = np.array(data['qa'])
@@ -145,9 +145,10 @@ def normalize(data, fields):
             result.append(qa)
         elif field in ['u10', 'v10']:
             x = np.array(data[field])
-            a = DATASET_STATS[field]['min']
-            b = DATASET_STATS[field]['max']
-            result.append((x - a) / (b - a))
+            mean = DATASET_STATS[field]['mean']
+            std = DATASET_STATS[field]['std']
+            x = (x - mean) / std
+            result.append(x)
         else:
             result.append(np.array(data[field]))
     return np.array(result)

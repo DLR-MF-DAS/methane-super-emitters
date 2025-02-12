@@ -33,7 +33,7 @@ class SuperEmitterDetector(L.LightningModule):
 
     def configure_optimizers(self):
         LR = 1e-3
-        optimizer = torch.optim.Adam(self.parameters(), lr=LR, weight_decay=0.01)
+        optimizer = torch.optim.Adam(self.parameters(), lr=LR, weight_decay=0.001)
         return optimizer
 
     def training_step(self, batch, batch_idx):
