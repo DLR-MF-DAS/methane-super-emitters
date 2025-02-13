@@ -24,18 +24,18 @@ DATASET_STATS = {
         "max": 1.0
     },
     "u10": {
-        "mean": 2.9203019451826925e+31,
-        "median": -0.23290672898292542,
-        "std": 1.7062537320392988e+34,
+        "mean": -0.3512625828486657,
+        "median": -0.23248033225536346,
+        "std": 3.082583589284194,
         "min": -16.78030014038086,
-        "max": 9.969209968386869e+36
+        "max": 17.881803512573242
     },
     "v10": {
-        "mean": 2.9203019451826925e+31,
+        "mean": -0.23241149430312563,
         "median": -0.3439149558544159,
-        "std": 1.7062537320392988e+34,
+        "std": 3.0300053289038926,
         "min": -16.52522850036621,
-        "max": 9.969209968386869e+36
+        "max": 18.62321662902832
     },
     "sza": {
         "mean": 0.692825452684085,
@@ -145,6 +145,7 @@ def normalize(data, fields):
             result.append(qa)
         elif field in ['u10', 'v10']:
             x = np.array(data[field])
+            x[np.argwhere(x > 1.0e+30)] = 0.0
             mean = DATASET_STATS[field]['mean']
             std = DATASET_STATS[field]['std']
             x = (x - mean) / std
@@ -165,7 +166,10 @@ def main(input_dir):
         for key in data:
             if key not in ['time', 'location', 'lat', 'lon', 'lat_bounds', 'lon_bounds',
                            'mask', 'non_destriped']:
-                results[key].append(data[key])
+                x = data[key]
+                if key in ['u10', 'v10']:
+                    x[np.argwhere(x > 1.0e+30)] = 0.0
+                results[key].append(x)
     for key in results:
         results[key] = np.array(results[key]).astype(np.float128)
     stats = {}

@@ -26,8 +26,8 @@ def process_tropomi_file(file_path, month_path, day_path, output_dir, input_file
                     print(f"FOUND: {csv_line}")
                     emitter = True
                     # Locate the pixel with the emitter
-                    for row in range(patch.shape[0]):
-                        for col in range(patch.shape[1]):
+                    for row in range(32):
+                        for col in range(32):
                             min_lat = patch['lat_bounds'][row][col].min()
                             max_lat = patch['lat_bounds'][row][col].max()
                             min_lon = patch['lon_bounds'][row][col].min()
