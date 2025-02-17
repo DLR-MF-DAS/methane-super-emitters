@@ -3,6 +3,7 @@ import torchmetrics
 import torch
 import torch.nn as nn
 
+
 class SuperEmitterDetector(L.LightningModule):
     def __init__(self, fields):
         super().__init__()
@@ -22,7 +23,7 @@ class SuperEmitterDetector(L.LightningModule):
             nn.ReLU(),
             nn.Dropout(0.5),
             nn.Linear(128, 1),
-            nn.Sigmoid()
+            nn.Sigmoid(),
         )
 
     def forward(self, x):
@@ -41,8 +42,8 @@ class SuperEmitterDetector(L.LightningModule):
         outputs = self(images).squeeze()
         loss = nn.functional.binary_cross_entropy(outputs, labels.float())
         acc = ((outputs > 0.5).int() == labels).float().mean()
-        self.log('train_loss', loss)
-        self.log('train_acc', acc)
+        self.log("train_loss", loss)
+        self.log("train_acc", acc)
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -50,12 +51,12 @@ class SuperEmitterDetector(L.LightningModule):
         outputs = self(images).squeeze()
         loss = nn.functional.binary_cross_entropy(outputs, labels.float())
         acc = ((outputs > 0.5).int() == labels).float().mean()
-        self.log('val_loss', loss)
-        self.log('val_acc', acc)
+        self.log("val_loss", loss)
+        self.log("val_acc", acc)
         return loss
 
     def test_step(self, batch, batch_idx):
         images, labels = batch
         outputs = self(images).squeeze()
         acc = ((outputs > 0.5).int() == labels).float().mean()
-        self.log('test_acc', acc)
+        self.log("test_acc", acc)

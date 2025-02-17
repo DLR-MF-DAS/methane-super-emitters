@@ -29,6 +29,7 @@ dependencies = [
     "lightning",
     "torchvision",
     "cdsapi>=0.7.2",
+    "black",
 ]
 
 [project.urls]
