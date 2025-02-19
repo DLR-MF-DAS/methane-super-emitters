@@ -5,7 +5,10 @@ import torch.nn as nn
 
 
 class SuperEmitterDetector(L.LightningModule):
-    def __init__(self, fields):
+    def __init__(self, fields, dropout=0.5, weight_decay=0.01):
+        self.fields = fields
+        self.dropout = dropout
+        self.weight_decay = weight_decay
         super().__init__()
         self.conv_layers = nn.Sequential(
             nn.Conv2d(len(fields), 16, kernel_size=3, stride=1, padding=1),
@@ -19,9 +22,10 @@ class SuperEmitterDetector(L.LightningModule):
             nn.MaxPool2d(kernel_size=2, stride=1),
         )
         self.fc_layers = nn.Sequential(
-            nn.Linear(3136, 128),
+            nn.Flatten(),
+            nn.Linear(64 * 7 * 7, 128),
             nn.ReLU(),
-            nn.Dropout(0.5),
+            nn.Dropout(self.dropout),
             nn.Linear(128, 1),
             nn.Sigmoid(),
         )
@@ -34,7 +38,7 @@ class SuperEmitterDetector(L.LightningModule):
 
     def configure_optimizers(self):
         LR = 1e-3
-        optimizer = torch.optim.Adam(self.parameters(), lr=LR, weight_decay=0.01)
+        optimizer = torch.optim.Adam(self.parameters(), lr=LR, weight_decay=self.weight_decay)
         return optimizer
 
     def training_step(self, batch, batch_idx):
