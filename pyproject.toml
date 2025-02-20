@@ -30,6 +30,7 @@ dependencies = [
     "torchvision",
     "cdsapi>=0.7.2",
     "black",
+    "optuna",
 ]
 
 [project.urls]
