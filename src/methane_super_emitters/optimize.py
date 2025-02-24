@@ -4,10 +4,6 @@ import optuna
 from methane_super_emitters.model import SuperEmitterDetector
 from methane_super_emitters.datamodule import TROPOMISuperEmitterDataModule
 
-@click.command()
-@click.option("-i", "--input-dir", help="Data directory")
-@click.option("-m", "--max-epochs", help="Maximum number of epochs", default=100)
-@click.option("-n", "--n-trials", help="Number of trials or points to sample", default=200)
 def optimize_model(input_dir, max_epochs, n_trials):
     def objective(trial):
         fields = ["methane", "u10", "v10", "qa"]
@@ -24,5 +20,12 @@ def optimize_model(input_dir, max_epochs, n_trials):
     df.to_csv('opt_results.csv')
     print("Best parameters:", study.best_params)
 
+@click.command()
+@click.option("-i", "--input-dir", help="Data directory")
+@click.option("-m", "--max-epochs", help="Maximum number of epochs", default=100)
+@click.option("-n", "--n-trials", help="Number of trials or points to sample", default=200)
+def optimize_model_(input_dir, max_epochs, n_trials):
+    return optimize_model(input_dir, max_epochs, n_trials)
+
 if __name__ == "__main__":
-    optimize_model()
+    optimize_model_()
