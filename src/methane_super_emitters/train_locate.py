@@ -10,7 +10,7 @@ from methane_super_emitters.datamodule import TROPOMISuperEmitterDataModule
 def train_model(input_dir, max_epochs):
     fields = ["methane", "u10", "v10", "qa"]
     model = SuperEmitterLocator(fields=fields)
-    datamodule = TROPOMISuperEmitterDataModule(input_dir, fields=fields)
+    datamodule = TROPOMISuperEmitterDataModule(input_dir, fields=fields, locator=True)
     trainer = L.Trainer(max_epochs=max_epochs)
     trainer.fit(model=model, datamodule=datamodule)
     #trainer.test(model=model, datamodule=datamodule)

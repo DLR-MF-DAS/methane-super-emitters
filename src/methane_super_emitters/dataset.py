@@ -37,3 +37,17 @@ class TROPOMISuperEmitterDataset(Dataset):
         return torch.tensor(img, dtype=torch.float), torch.tensor(
             label, dtype=torch.float
         )
+
+
+class TROPOMISuperEmitterLocatorDataset(TROPOMISuperEmitterDataset):
+    def __init__(self, data_dir, fields):
+        self.data_dir = data_dir
+        self.samples = []
+        self.positive_filenames = glob.glob(os.path.join(data_dir, "positive", "*.npz"))
+        negative_filenames = glob.glob(os.path.join(data_dir, "negative", "*.npz"))
+        self.negative_filenames = negative_filenames[: len(self.positive_filenames)]
+        self.filenames = self.positive_filenames + self.negative_filenames
+        for filename in self.filenames:
+            data = np.load(filename)
+            self.samples.append((normalize(data, fields), data['location']))
+
