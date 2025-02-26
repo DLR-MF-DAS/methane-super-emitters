@@ -31,12 +31,10 @@ class SuperEmitterLocator(L.LightningModule):
         out = self.conv_layers(x)
         out = out.view(out.size(0), -1)
         out = self.fc_layers(out)
-        out = torch.softmax(out, dim=1)
-        out = out.view(out.shape[0], 32, 32)
         return out
 
     def configure_optimizers(self):
-        return torch.optim.Adam(self.parameters(), lr=0.001)
+        return torch.optim.Adam(self.parameters(), lr=1e-4)
 
     def training_step(self, batch, batch_idx):
         x, y = batch
