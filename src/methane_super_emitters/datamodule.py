@@ -1,6 +1,9 @@
 import lightning as L
 from torch.utils.data import random_split, DataLoader
-from methane_super_emitters.dataset import TROPOMISuperEmitterDataset, TROPOMISuperEmitterLocatorDataset
+from methane_super_emitters.dataset import (
+    TROPOMISuperEmitterDataset,
+    TROPOMISuperEmitterLocatorDataset,
+)
 
 
 class TROPOMISuperEmitterDataModule(L.LightningDataModule):
@@ -9,7 +12,9 @@ class TROPOMISuperEmitterDataModule(L.LightningDataModule):
         self.data_dir = data_dir
         self.batch_size = batch_size
         if locator:
-            self.dataset = TROPOMISuperEmitterLocatorDataset(self.data_dir, fields=fields)
+            self.dataset = TROPOMISuperEmitterLocatorDataset(
+                self.data_dir, fields=fields
+            )
         else:
             self.dataset = TROPOMISuperEmitterDataset(self.data_dir, fields=fields)
         self.train_set, self.val_set, self.test_set = random_split(

@@ -49,5 +49,4 @@ class TROPOMISuperEmitterLocatorDataset(TROPOMISuperEmitterDataset):
         self.filenames = self.positive_filenames + self.negative_filenames
         for filename in self.filenames:
             data = np.load(filename)
-            self.samples.append((normalize(data, fields), data['location']))
-
+            self.samples.append((normalize(data, fields), data["location"]))

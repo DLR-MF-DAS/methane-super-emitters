@@ -17,7 +17,7 @@ class SuperEmitterLocator(L.LightningModule):
             nn.ReLU(),
             nn.Conv2d(64, 128, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.AdaptiveAvgPool2d((8, 8))
+            nn.AdaptiveAvgPool2d((8, 8)),
         )
         self.fc_layers = nn.Sequential(
             nn.Linear(128 * 8 * 8, 1024),
@@ -80,7 +80,9 @@ class SuperEmitterDetector(L.LightningModule):
 
     def configure_optimizers(self):
         LR = 1e-3
-        optimizer = torch.optim.Adam(self.parameters(), lr=LR, weight_decay=self.weight_decay)
+        optimizer = torch.optim.Adam(
+            self.parameters(), lr=LR, weight_decay=self.weight_decay
+        )
         return optimizer
 
     def training_step(self, batch, batch_idx):
