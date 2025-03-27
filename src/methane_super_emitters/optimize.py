@@ -10,7 +10,8 @@ def optimize_model(input_dir, max_epochs, n_trials):
         fields = ["methane", "u10", "v10", "qa"]
         dropout_rate = trial.suggest_float("dropout", 0.1, 0.9)
         weight_decay = trial.suggest_float("weight_decay", 1e-5, 1e-2)
-        model = SuperEmitterDetector(fields=fields)
+        learning_rate = trial.suggest_float("learning_rate", 1e-5, 1e-2)
+        model = SuperEmitterDetector(fields=fields, dropout=dropout_rate, weight_decay=weight_decay, lr=learning_rate)
         datamodule = TROPOMISuperEmitterDataModule(input_dir, fields=fields)
         trainer = L.Trainer(max_epochs=max_epochs)
         trainer.fit(model=model, datamodule=datamodule)

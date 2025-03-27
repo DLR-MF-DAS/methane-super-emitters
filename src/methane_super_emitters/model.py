@@ -47,10 +47,11 @@ class SuperEmitterLocator(L.LightningModule):
 
 
 class SuperEmitterDetector(L.LightningModule):
-    def __init__(self, fields, dropout=0.5, weight_decay=0.01):
+    def __init__(self, fields, dropout=0.5, weight_decay=0.01, lr=1e-3):
         self.fields = fields
         self.dropout = dropout
         self.weight_decay = weight_decay
+        self.lr = lr
         super().__init__()
         self.conv_layers = nn.Sequential(
             nn.Conv2d(len(fields), 16, kernel_size=3, stride=1, padding=1),
@@ -79,7 +80,7 @@ class SuperEmitterDetector(L.LightningModule):
         return out
 
     def configure_optimizers(self):
-        LR = 1e-3
+        LR = self.lr
         optimizer = torch.optim.Adam(
             self.parameters(), lr=LR, weight_decay=self.weight_decay
         )
