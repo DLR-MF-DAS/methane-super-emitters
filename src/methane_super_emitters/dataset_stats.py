@@ -9,112 +9,111 @@ import json
 
 DATASET_STATS = {
     "methane": {
-        "mean": 1862.9641199220912,
-        "median": 1879.0816650390625,
-        "std": 66.34578040359114,
-        "min": 1115.669189453125,
-        "max": 2527.0158081054688,
+        "mean": 1862.5366583594632,
+        "median": 1878.5830688476562,
+        "std": 66.58710672017679,
+        "min": 971.0758666992188,
+        "max": 3324.72998046875
     },
     "qa": {
-        "mean": 0.8079299465221805,
+        "mean": 0.8106104458852114,
         "median": 1.0,
-        "std": 0.32904064000460764,
+        "std": 0.3274058748852436,
         "min": 0.0,
-        "max": 1.0,
+        "max": 1.0
     },
     "u10": {
-        "mean": -0.3512625828486657,
-        "median": -0.23248033225536346,
-        "std": 3.082583589284194,
-        "min": -16.78030014038086,
-        "max": 17.881803512573242,
+        "mean": -0.3505060237319564,
+        "median": -0.237032949924469,
+        "std": 3.0427688265223236,
+        "min": -16.58311653137207,
+        "max": 16.715341567993164
     },
     "v10": {
-        "mean": -0.23241149430312563,
-        "median": -0.3439149558544159,
-        "std": 3.0300053289038926,
-        "min": -16.52522850036621,
-        "max": 18.62321662902832,
+        "mean": -0.2016462336753655,
+        "median": -0.3121262937784195,
+        "std": 3.0363927475921657,
+        "min": -15.385231018066406,
+        "max": 22.70849609375
     },
     "sza": {
-        "mean": 0.6892348274598235,
-        "median": 0.7051632106304169,
-        "std": 0.17974190986091854,
-        "min": 0.2416170984506607,
-        "max": 0.9911504983901978,
+        "mean": 0.6852687383838644,
+        "median": 0.70140740275383,
+        "std": 0.17970663271587994,
+        "min": 0.24475011229515076,
+        "max": 0.9911531805992126
     },
     "vza": {
-        "mean": 0.8908392256240117,
-        "median": 0.9287970662117004,
-        "std": 0.11002508192787454,
-        "min": 0.4970099925994873,
-        "max": 0.9998136758804321,
+        "mean": 0.891019676507066,
+        "median": 0.928871214389801,
+        "std": 0.11010636053335394,
+        "min": 0.49698495864868164,
+        "max": 0.9998136758804321
     },
     "scattering_angle": {
-        "mean": -0.6033922639033007,
-        "median": -0.647180062178118,
-        "std": 0.26156256858396837,
-        "min": -0.9999999439365981,
-        "max": 0.40050015763160485,
+        "mean": -0.6000556685447394,
+        "median": -0.6434199315569306,
+        "std": 0.26127084751804125,
+        "min": -0.9999982782919568,
+        "max": 0.4007348417791011
     },
     "sa_std": {
-        "mean": 16.502662089815193,
-        "median": 8.709863662719727,
-        "std": 26.36883710896449,
+        "mean": 16.65754507928552,
+        "median": 8.775827407836914,
+        "std": 26.56312667561806,
         "min": 0.0,
-        "max": 965.2076416015625,
+        "max": 965.2076416015625
     },
     "cloud_fraction": {
-        "mean": 7.44786507344531e34,
+        "mean": 0.010853144763690946,
         "median": 0.0,
-        "std": 8.584557285723529e35,
+        "std": 0.07413277621675883,
         "min": 0.0,
-        "max": 9.969209968386869e36,
+        "max": 1.0
     },
     "cirrus_reflectance": {
-        "mean": 7.883227337810577e35,
-        "median": 0.000916256511118263,
-        "std": 2.690260605093876e36,
-        "min": 0.00021310012380126864,
-        "max": 9.969209968386869e36,
+        "mean": 0.002408624468020358,
+        "median": 0.0,
+        "std": 0.00954486875404972,
+        "min": 0.0,
+        "max": 0.1243622899055481
     },
     "methane_ratio_std": {
-        "mean": 7.230339082303514e35,
-        "median": 0.014838868286460638,
-        "std": 2.5855944796044255e36,
+        "mean": 0.0049173906056315655,
+        "median": 0.0,
+        "std": 0.0085810962161963,
         "min": 0.0,
-        "max": 9.969209968386869e36,
+        "max": 0.6137746572494507
     },
     "methane_precision": {
-        "mean": 7.230339082303514e35,
-        "median": 1.6617772579193115,
-        "std": 2.5855944796044255e36,
-        "min": 0.660350501537323,
-        "max": 9.969209968386869e36,
+        "mean": 0.6099002507901794,
+        "median": 0.0,
+        "std": 1.0656924191550565,
+        "min": 0.0,
+        "max": 47.113624572753906
     },
     "surface_albedo": {
-        "mean": 7.230339082303514e35,
-        "median": 0.1909976452589035,
-        "std": 2.5855944796044255e36,
-        "min": -0.06418812274932861,
-        "max": 9.969209968386869e36,
+        "mean": 0.08097774154289568,
+        "median": 0.0,
+        "std": 0.16019963835712323,
+        "min": -0.05953392758965492,
+        "max": 0.7304432988166809
     },
     "surface_albedo_precision": {
-        "mean": 7.230339082303514e35,
-        "median": 0.00013950675929663703,
-        "std": 2.5855944796044255e36,
-        "min": 4.564654591376893e-05,
-        "max": 9.969209968386869e36,
+        "mean": 6.182406963785989e-05,
+        "median": 0.0,
+        "std": 0.00012510325923893395,
+        "min": 0.0,
+        "max": 0.009150429628789425
     },
     "aerosol_optical_thickness": {
-        "mean": 7.230339082303514e35,
-        "median": 0.04946461133658886,
-        "std": 2.5855944796044255e36,
-        "min": 0.00025335102691315114,
-        "max": 9.969209968386869e36,
-    },
+        "mean": 0.020228099796273182,
+        "median": 0.0,
+        "std": 0.04644573871021487,
+        "min": 0.0,
+        "max": 0.9478278756141663
+    }
 }
-
 
 def normalize(data, fields):
     """Normalize the selected fields in the dataset.
@@ -132,32 +131,41 @@ def normalize(data, fields):
     """
     result = []
     for field in fields:
-        if field in ["methane"]:
-            m = np.array(data[field])
-            m[data["mask"]] = np.nanmedian(m)
-            mean = DATASET_STATS[field]["mean"]
-            std = DATASET_STATS[field]["std"]
-            m = (m - mean) / std
-            result.append(m)
-        elif field == "qa":
-            qa = np.array(data["qa"])
-            qa = (qa > 0.5).astype(np.float64)
-            result.append(qa)
-        elif field in ["u10", "v10"]:
-            x = np.array(data[field])
-            x[np.argwhere(x > 1.0e30)] = 0.0
-            mean = DATASET_STATS[field]["mean"]
-            std = DATASET_STATS[field]["std"]
-            x = (x - mean) / std
-            result.append(x)
-        elif field in ["sza", "vza", "scattering_angle", "sa_std"]:
-            x = np.array(data[field])
-            mean = DATASET_STATS[field]["mean"]
-            std = DATASET_STATS[field]["std"]
-            x = (x - mean) / std
-            result.append(x)
-        else:
-            result.append(np.array(data[field]))
+        x = np.array(data[field])
+        if field == "methane":
+            x[data["mask"]] = np.nanmedian(x)
+        x[np.argwhere(x > 1.0e30)] = 0.0
+        a = DATASET_STATS[field]["min"]
+        b = DATASET_STATS[field]["max"]
+        x = (x - a) / (b - a)
+        result.append(x)
+    # for field in fields:
+    #     if field in ["methane"]:
+    #         m = np.array(data[field])
+    #         m[data["mask"]] = np.nanmedian(m)
+    #         mean = DATASET_STATS[field]["mean"]
+    #         std = DATASET_STATS[field]["std"]
+    #         m = (m - mean) / std
+    #         result.append(m)
+    #     elif field == "qa":
+    #         qa = np.array(data["qa"])
+    #         qa = (qa > 0.5).astype(np.float64)
+    #         result.append(qa)
+    #     elif field in ["u10", "v10"]:
+    #         x = np.array(data[field])
+    #         x[np.argwhere(x > 1.0e30)] = 0.0
+    #         mean = DATASET_STATS[field]["mean"]
+    #         std = DATASET_STATS[field]["std"]
+    #         x = (x - mean) / std
+    #         result.append(x)
+    #     elif field in ["sza", "vza", "scattering_angle", "sa_std"]:
+    #         x = np.array(data[field])
+    #         mean = DATASET_STATS[field]["mean"]
+    #         std = DATASET_STATS[field]["std"]
+    #         x = (x - mean) / std
+    #         result.append(x)
+    #     else:
+    #         result.append(np.array(data[field]))
     return np.array(result)
 
 
@@ -182,7 +190,10 @@ def main(input_dir):
                 "non_destriped",
             ]:
                 x = data[key]
-                if key in ["u10", "v10"]:
+                if key in [
+                        "u10", "v10", "cloud_fraction", "cirrus_reflectance",
+                        "methane_ratio_std", "methane_precision", "surface_albedo",
+                        "surface_albedo_precision", "aerosol_optical_thickness"]:
                     x[np.argwhere(x > 1.0e30)] = 0.0
                 results[key].append(x)
     for key in results:

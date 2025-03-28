@@ -7,7 +7,8 @@ from methane_super_emitters.datamodule import TROPOMISuperEmitterDataModule
 
 def optimize_model(input_dir, max_epochs, n_trials):
     def objective(trial):
-        fields = ["methane", "u10", "v10", "qa"]
+        fields = ["methane", "u10", "v10", "qa", "sza", "vza", "scattering_angle", "sa_std", "cloud_fraction", "cirrus_reflectance",
+                  "methane_ratio_std", "methane_precision", "surface_albedo", "surface_albedo_precision", "aerosol_optical_thickness"]
         dropout_rate = trial.suggest_float("dropout", 0.1, 0.9)
         weight_decay = trial.suggest_float("weight_decay", 1e-5, 1e-2)
         learning_rate = trial.suggest_float("learning_rate", 1e-5, 1e-2)
@@ -20,7 +21,6 @@ def optimize_model(input_dir, max_epochs, n_trials):
             trainer.fit(model=model, datamodule=datamodule)
             result += trainer.callback_metrics["val_acc"].item()
         return result / n
-
     study = optuna.create_study(direction="maximize")
     study.optimize(objective, n_trials=n_trials)
     df = study.trials_dataframe()

@@ -45,46 +45,50 @@ class SuperEmitterLocator(L.LightningModule):
         self.log("train_loss", loss)
         return loss
 
-
 class SuperEmitterDetector(L.LightningModule):
-    def __init__(self, fields, dropout=0.5, weight_decay=0.01, lr=1e-3):
+    def __init__(self, fields, dropout=0.4, weight_decay=0.01, lr=1e-3):
+        super().__init__()
         self.fields = fields
         self.dropout = dropout
         self.weight_decay = weight_decay
         self.lr = lr
-        super().__init__()
+
         self.conv_layers = nn.Sequential(
-            nn.Conv2d(len(fields), 16, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2),
-            nn.Conv2d(16, 32, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Conv2d(len(fields), 32, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(32),
+            nn.LeakyReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),  # 32x16x16
+
             nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=1),
+            nn.BatchNorm2d(64),
+            nn.LeakyReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),  # 64x8x8
+
+            nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(128),
+            nn.LeakyReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),  # 128x4x4
         )
+
         self.fc_layers = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(64 * 7 * 7, 128),
-            nn.ReLU(),
+            nn.Linear(128 * 4 * 4, 128),
+            nn.LeakyReLU(),
             nn.Dropout(self.dropout),
-            nn.Linear(128, 1),
+            nn.Linear(128, 64),
+            nn.LeakyReLU(),
+            nn.Dropout(self.dropout),
+            nn.Linear(64, 1),
             nn.Sigmoid(),
         )
 
     def forward(self, x):
-        out = self.conv_layers(x)
-        out = out.view(out.size(0), -1)
-        out = self.fc_layers(out)
-        return out
+        x = self.conv_layers(x)
+        x = self.fc_layers(x)
+        return x
 
     def configure_optimizers(self):
-        LR = self.lr
-        optimizer = torch.optim.Adam(
-            self.parameters(), lr=LR, weight_decay=self.weight_decay
-        )
-        return optimizer
+        return torch.optim.Adam(self.parameters(), lr=self.lr, weight_decay=self.weight_decay)
 
     def training_step(self, batch, batch_idx):
         images, labels = batch
@@ -109,3 +113,4 @@ class SuperEmitterDetector(L.LightningModule):
         outputs = self(images).squeeze()
         acc = ((outputs > 0.5).int() == labels).float().mean()
         self.log("test_acc", acc)
+
