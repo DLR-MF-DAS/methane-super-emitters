@@ -11,11 +11,15 @@ def optimize_model(input_dir, max_epochs, n_trials):
         dropout_rate = trial.suggest_float("dropout", 0.1, 0.9)
         weight_decay = trial.suggest_float("weight_decay", 1e-5, 1e-2)
         learning_rate = trial.suggest_float("learning_rate", 1e-5, 1e-2)
-        model = SuperEmitterDetector(fields=fields, dropout=dropout_rate, weight_decay=weight_decay, lr=learning_rate)
-        datamodule = TROPOMISuperEmitterDataModule(input_dir, fields=fields)
-        trainer = L.Trainer(max_epochs=max_epochs)
-        trainer.fit(model=model, datamodule=datamodule)
-        return trainer.callback_metrics["val_acc"].item()
+        n = 1
+        result = 0.0
+        for _ in range(n):
+            model = SuperEmitterDetector(fields=fields, dropout=dropout_rate, weight_decay=weight_decay, lr=learning_rate)
+            datamodule = TROPOMISuperEmitterDataModule(input_dir, fields=fields)
+            trainer = L.Trainer(max_epochs=max_epochs)
+            trainer.fit(model=model, datamodule=datamodule)
+            result += trainer.callback_metrics["val_acc"].item()
+        return result / n
 
     study = optuna.create_study(direction="maximize")
     study.optimize(objective, n_trials=n_trials)
