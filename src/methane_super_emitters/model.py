@@ -55,30 +55,22 @@ class SuperEmitterDetector(L.LightningModule):
 
         self.conv_layers = nn.Sequential(
             nn.Conv2d(len(fields), 32, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(32),
-            nn.LeakyReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2),  # 32x16x16
-
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
             nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(64),
-            nn.LeakyReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2),  # 64x8x8
-
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
             nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(128),
-            nn.LeakyReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2),  # 128x4x4
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
         )
 
         self.fc_layers = nn.Sequential(
             nn.Flatten(),
             nn.Linear(128 * 4 * 4, 128),
-            nn.LeakyReLU(),
+            nn.ReLU(),
             nn.Dropout(self.dropout),
-            nn.Linear(128, 64),
-            nn.LeakyReLU(),
-            nn.Dropout(self.dropout),
-            nn.Linear(64, 1),
+            nn.Linear(128, 1),
             nn.Sigmoid(),
         )
 

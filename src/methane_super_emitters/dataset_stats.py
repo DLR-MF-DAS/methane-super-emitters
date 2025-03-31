@@ -135,9 +135,9 @@ def normalize(data, fields):
         if field == "methane":
             x[data["mask"]] = np.nanmedian(x)
         x[np.argwhere(x > 1.0e30)] = 0.0
-        a = DATASET_STATS[field]["min"]
-        b = DATASET_STATS[field]["max"]
-        x = (x - a) / (b - a)
+        a = DATASET_STATS[field]["mean"]
+        b = DATASET_STATS[field]["std"]
+        x = (x - a) / b
         result.append(x)
     # for field in fields:
     #     if field in ["methane"]:
