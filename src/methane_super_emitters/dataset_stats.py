@@ -65,52 +65,52 @@ DATASET_STATS = {
         "max": 965.2076416015625
     },
     "cloud_fraction": {
-        "mean": 0.010853144763690946,
+        "mean": 0.01090941047789615,
         "median": 0.0,
-        "std": 0.07413277621675883,
+        "std": 0.07432056077852912,
         "min": 0.0,
         "max": 1.0
     },
     "cirrus_reflectance": {
-        "mean": 0.002408624468020358,
-        "median": 0.0,
-        "std": 0.00954486875404972,
-        "min": 0.0,
+        "mean": 0.0076356382782573375,
+        "median": 0.0009303436963818967,
+        "std": 0.015776597822602885,
+        "min": 0.0002604854525998235,
         "max": 0.1243622899055481
     },
     "methane_ratio_std": {
-        "mean": 0.0049173906056315655,
-        "median": 0.0,
-        "std": 0.0085810962161963,
+        "mean": 0.015498464140226103,
+        "median": 0.013930243905633688,
+        "std": 0.008251700674364655,
         "min": 0.0,
         "max": 0.6137746572494507
     },
     "methane_precision": {
-        "mean": 0.6099002507901794,
-        "median": 0.0,
-        "std": 1.0656924191550565,
-        "min": 0.0,
+        "mean": 1.9222628267848303,
+        "median": 1.525813102722168,
+        "std": 1.0279862891362634,
+        "min": 0.4484795033931732,
         "max": 47.113624572753906
     },
     "surface_albedo": {
-        "mean": 0.08097774154289568,
-        "median": 0.0,
-        "std": 0.16019963835712323,
+        "mean": 0.2552228863051395,
+        "median": 0.20020487904548645,
+        "std": 0.19082801877126865,
         "min": -0.05953392758965492,
         "max": 0.7304432988166809
     },
     "surface_albedo_precision": {
-        "mean": 6.182406963785989e-05,
-        "median": 0.0,
-        "std": 0.00012510325923893395,
-        "min": 0.0,
+        "mean": 0.00019485499589718866,
+        "median": 0.00014690541866002604,
+        "std": 0.0001529901885660502,
+        "min": 4.922595326206647e-05,
         "max": 0.009150429628789425
     },
     "aerosol_optical_thickness": {
-        "mean": 0.020228099796273182,
-        "median": 0.0,
-        "std": 0.04644573871021487,
-        "min": 0.0,
+        "mean": 0.06375423562212419,
+        "median": 0.04918431304395199,
+        "std": 0.06343528096438461,
+        "min": 0.0008362894877791405,
         "max": 0.9478278756141663
     }
 }
@@ -134,40 +134,12 @@ def normalize(data, fields):
         x = np.array(data[field])
         if field == "methane":
             x[data["mask"]] = np.nanmedian(x)
-        x[np.argwhere(x > 1.0e30)] = 0.0
-        a = DATASET_STATS[field]["mean"]
-        b = DATASET_STATS[field]["std"]
-        x = (x - a) / b
+        x[np.argwhere(x > 1.0e30)] = np.nanmedian(x)
+        a = DATASET_STATS[field]["min"]
+        b = DATASET_STATS[field]["max"]
+        x = (x - a) / (b - a)
         result.append(x)
-    # for field in fields:
-    #     if field in ["methane"]:
-    #         m = np.array(data[field])
-    #         m[data["mask"]] = np.nanmedian(m)
-    #         mean = DATASET_STATS[field]["mean"]
-    #         std = DATASET_STATS[field]["std"]
-    #         m = (m - mean) / std
-    #         result.append(m)
-    #     elif field == "qa":
-    #         qa = np.array(data["qa"])
-    #         qa = (qa > 0.5).astype(np.float64)
-    #         result.append(qa)
-    #     elif field in ["u10", "v10"]:
-    #         x = np.array(data[field])
-    #         x[np.argwhere(x > 1.0e30)] = 0.0
-    #         mean = DATASET_STATS[field]["mean"]
-    #         std = DATASET_STATS[field]["std"]
-    #         x = (x - mean) / std
-    #         result.append(x)
-    #     elif field in ["sza", "vza", "scattering_angle", "sa_std"]:
-    #         x = np.array(data[field])
-    #         mean = DATASET_STATS[field]["mean"]
-    #         std = DATASET_STATS[field]["std"]
-    #         x = (x - mean) / std
-    #         result.append(x)
-    #     else:
-    #         result.append(np.array(data[field]))
     return np.array(result)
-
 
 @click.command()
 @click.option("-i", "--input-dir", help="Directory with the full dataset")
@@ -194,7 +166,7 @@ def main(input_dir):
                         "u10", "v10", "cloud_fraction", "cirrus_reflectance",
                         "methane_ratio_std", "methane_precision", "surface_albedo",
                         "surface_albedo_precision", "aerosol_optical_thickness"]:
-                    x[np.argwhere(x > 1.0e30)] = 0.0
+                    x[np.argwhere(x > 1.0e30)] = np.nan
                 results[key].append(x)
     for key in results:
         results[key] = np.array(results[key]).astype(np.float128)
