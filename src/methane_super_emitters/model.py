@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 class SuperEmitterDetector(L.LightningModule):
-    def __init__(self, fields, dropout=0.6, weight_decay=2e-3, lr=1e-3):
+    def __init__(self, fields, dropout=0.5, weight_decay=3e-3, lr=1e-3):
         super().__init__()
         self.fields = fields
         self.dropout = dropout

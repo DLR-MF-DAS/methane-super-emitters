@@ -9,7 +9,7 @@ from methane_super_emitters.dataset_stats import normalize
 
 
 class TROPOMISuperEmitterDataset(Dataset):
-    def __init__(self, data_dir, fields):
+    def __init__(self, data_dir, fields, transform=None):
         self.data_dir = data_dir
         self.samples = []
         self.positive_filenames = glob.glob(os.path.join(data_dir, "positive", "*.npz"))
@@ -17,16 +17,17 @@ class TROPOMISuperEmitterDataset(Dataset):
         self.negative_filenames = negative_filenames[: len(self.positive_filenames)]
         for filename in self.positive_filenames:
             data = np.load(filename)
-            self.samples.append((normalize(data, fields), 1.0))
+            image = normalize(data, fields)
+            self.samples.append((image, 1.0))
         for filename in self.negative_filenames:
             data = np.load(filename)
-            self.samples.append((normalize(data, fields), 0.0))
+            image = normalize(data, fields)
+            self.samples.append((image, 0.0))
 
     def unload(self):
         """Make garbage collector collect the data."""
         self.samples = []
         import gc
-
         gc.collect()
 
     def __len__(self):
