@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 class SuperEmitterDetector(L.LightningModule):
-    def __init__(self, fields, dropout=0.4, weight_decay=1e-3, lr=1e-3):
+    def __init__(self, fields, dropout=0.6, weight_decay=2e-3, lr=1e-3):
         super().__init__()
         self.fields = fields
         self.dropout = dropout
@@ -13,7 +13,12 @@ class SuperEmitterDetector(L.LightningModule):
         self.lr = lr
 
         self.conv_layers = nn.Sequential(
-            nn.Conv2d(len(fields), 32, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(len(fields), 16, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(16),
+            nn.ReLU(),
+            nn.MaxPool2d(2, 2),
+
+            nn.Conv2d(16, 32, kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(32),
             nn.ReLU(),
             nn.MaxPool2d(2, 2),
@@ -21,21 +26,15 @@ class SuperEmitterDetector(L.LightningModule):
             nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(64),
             nn.ReLU(),
-            nn.MaxPool2d(2, 2),
-
-            nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(128),
-            nn.ReLU(),
             nn.MaxPool2d(2, 2)
         )
 
         self.fc_layers = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(128 * 4 * 4, 128),  # Smaller FC layer
+            nn.Linear(64 * 4 * 4, 64),
             nn.ReLU(),
             nn.Dropout(p=self.dropout),
-            nn.Linear(128, 1),
-            nn.Sigmoid()
+            nn.Linear(64, 1),
         )
 
     def forward(self, x):
@@ -50,7 +49,7 @@ class SuperEmitterDetector(L.LightningModule):
     def _shared_step(self, batch, stage):
         images, labels = batch
         outputs = self(images).squeeze()
-        loss = torch.nn.functional.binary_cross_entropy(outputs, labels.float())
+        loss = torch.nn.functional.binary_cross_entropy_with_logits(outputs, labels.float())
 
         acc = ((torch.sigmoid(outputs) > 0.5).int() == labels).float().mean()
         self.log(f"{stage}_loss", loss, prog_bar=True)
