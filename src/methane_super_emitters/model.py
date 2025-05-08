@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 class SuperEmitterDetector(L.LightningModule):
-    def __init__(self, fields, dropout=0.0, weight_decay=1e-4, lr=1e-4):
+    def __init__(self, fields, dropout=0.4, weight_decay=1e-3, lr=1e-3):
         super().__init__()
         self.fields = fields
         self.dropout = dropout
@@ -16,27 +16,25 @@ class SuperEmitterDetector(L.LightningModule):
             nn.Conv2d(len(fields), 32, kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(32),
             nn.ReLU(),
-            nn.MaxPool2d(2),
+            nn.MaxPool2d(2, 2),
 
             nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(64),
             nn.ReLU(),
-            nn.MaxPool2d(2),
+            nn.MaxPool2d(2, 2),
 
             nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(128),
             nn.ReLU(),
-            nn.MaxPool2d(2)
+            nn.MaxPool2d(2, 2)
         )
 
         self.fc_layers = nn.Sequential(
             nn.Flatten(),
             nn.Linear(128 * 4 * 4, 128),  # Smaller FC layer
             nn.ReLU(),
-            nn.Linear(128, 64),
-            nn.ReLU(),
-            #nn.Dropout(self.dropout),
-            nn.Linear(64, 1),
+            nn.Dropout(p=self.dropout),
+            nn.Linear(128, 1),
             nn.Sigmoid()
         )
 
@@ -46,8 +44,7 @@ class SuperEmitterDetector(L.LightningModule):
         return x.squeeze()
 
     def configure_optimizers(self):
-        optimizer = optim.Adam(self.parameters(), lr=self.lr)#, weight_decay=self.weight_decay)
-        #scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=2, verbose=True)
+        optimizer = optim.Adam(self.parameters(), lr=self.lr, weight_decay=self.weight_decay)
         return optimizer
 
     def _shared_step(self, batch, stage):
@@ -69,6 +66,6 @@ class SuperEmitterDetector(L.LightningModule):
     def test_step(self, batch, batch_idx):
         return self._shared_step(batch, "test")
 
-#    def on_before_optimizer_step(self, optimizer):
-#        """Gradient clipping to prevent overfitting by controlling weight explosion."""
-#        torch.nn.utils.clip_grad_norm_(self.parameters(), max_norm=1.0)
+    def on_before_optimizer_step(self, optimizer):
+        """Gradient clipping to prevent overfitting by controlling weight explosion."""
+        torch.nn.utils.clip_grad_norm_(self.parameters(), max_norm=1.0)
