@@ -15,7 +15,7 @@ def main(data_dir, output_dir):
         fig, axs = plt.subplots(2, len(fields))
         for index, field in enumerate(fields):
             axs[0, index].imshow(sample[0][index])
-            axs[1, index].hist(sample[0][index])
+            axs[1, index].hist(sample[0][index], bins=20)
         if sample[1] == 0.0:
             plt.savefig(os.path.join(output_dir, 'negative', filename))
         else:
