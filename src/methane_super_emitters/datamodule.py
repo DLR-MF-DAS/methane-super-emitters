@@ -1,8 +1,10 @@
 import lightning as L
+import torchvision.transforms as transforms
 from torch.utils.data import random_split, DataLoader
 from methane_super_emitters.dataset import (
     TROPOMISuperEmitterDataset,
     TROPOMISuperEmitterLocatorDataset,
+    TransformWrapper,
 )
 
 
@@ -20,6 +22,12 @@ class TROPOMISuperEmitterDataModule(L.LightningDataModule):
         self.train_set, self.val_set, self.test_set = random_split(
             self.dataset, [0.7, 0.15, 0.15]
         )
+        transform = transforms.Compose([
+            transforms.RandomHorizontalFlip(p=0.5),
+            transforms.RandomVerticalFlip(p=0.5),
+            #transforms.RandomAffine(degrees=10, translate=(0.1, 0.1), scale=(0.9, 1.1))
+        ])
+        self.train_set = TransformWrapper(self.train_set, transform)
 
     def setup(self, stage):
         pass

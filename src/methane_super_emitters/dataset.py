@@ -39,6 +39,19 @@ class TROPOMISuperEmitterDataset(Dataset):
             label, dtype=torch.float
         )
 
+class TransformWrapper(Dataset):
+    def __init__(self, base_dataset, transform):
+        self.base_dataset = base_dataset
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.base_dataset)
+
+    def __getitem__(self, idx):
+        image, label = self.base_dataset[idx]
+        if self.transform:
+            image = self.transform(image)
+        return image, label
 
 class TROPOMISuperEmitterLocatorDataset(TROPOMISuperEmitterDataset):
     def __init__(self, data_dir, fields):
