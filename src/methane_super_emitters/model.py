@@ -40,7 +40,8 @@ class SuperEmitterDetector(L.LightningModule):
     def forward(self, x):
         x = self.conv_layers(x)
         x = self.fc_layers(x)
-        return x.squeeze()
+        return x.view(-1, 1)
+        #return x.squeeze()
 
     def configure_optimizers(self):
         optimizer = optim.Adam(self.parameters(), lr=self.lr, weight_decay=self.weight_decay)
