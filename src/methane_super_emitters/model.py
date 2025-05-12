@@ -3,6 +3,8 @@ import torchmetrics
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 class SuperEmitterDetector(L.LightningModule):
     def __init__(self, fields, dropout=0.4, weight_decay=1e-4, lr=1e-3):
@@ -11,6 +13,7 @@ class SuperEmitterDetector(L.LightningModule):
         self.dropout = dropout
         self.weight_decay = weight_decay
         self.lr = lr
+        self.confmat = torchmetrics.ConfusionMatrix(task="binary", num_classes=2)
 
         self.conv_layers = nn.Sequential(
             nn.Conv2d(len(fields), 16, kernel_size=3, stride=1, padding=1),
@@ -64,8 +67,25 @@ class SuperEmitterDetector(L.LightningModule):
         return self._shared_step(batch, "val")
 
     def test_step(self, batch, batch_idx):
+        x, y = batch
+        logits = self(x)
+        pred = torch.sigmoid(logits)
+        self.confmat.update(pred.flatten(), y)
         return self._shared_step(batch, "test")
+
+    def on_test_epoch_end(self):
+        conf_matrix = self.confmat.compute()
+        self.logger.experiment.add_figure("Confusion Matrix", self.plot_confmat(conf_matrix), self.current_epoch)
+        self.confmat.reset()
 
     def on_before_optimizer_step(self, optimizer):
         """Gradient clipping to prevent overfitting by controlling weight explosion."""
         torch.nn.utils.clip_grad_norm_(self.parameters(), max_norm=1.0)
+
+    def plot_confmat(self, conf_matrix):
+        fig, ax = plt.subplots(figsize=(6, 6))
+        sns.heatmap(conf_matrix.cpu().numpy(), annot=True, fmt="d", cmap="Blues", ax=ax)
+        ax.set_xlabel("Predicted")
+        ax.set_ylabel("True")
+        ax.set_title("Confusion Matrix")
+        return fig

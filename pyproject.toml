@@ -32,6 +32,9 @@ dependencies = [
     "black",
     "optuna",
     "grad-cam",
+    "seaborn",
+    "tensorboard",
+    "tensorboard_logger",
 ]
 
 [project.urls]
