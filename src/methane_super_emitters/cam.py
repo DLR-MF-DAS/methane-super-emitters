@@ -30,7 +30,11 @@ def main(input_path, output_path, checkpoint):
         grayscale_cam = cam(input_tensor=input_tensor)[0]
         fig, axs = plt.subplots(1, 2)
         axs[0].imshow(example_image[0][0].detach().numpy())
+        locations = np.argwhere(data['location'] == 1)
+        axs[0].scatter(locations[:, 1], locations[:, 0], color='red', s=50)
+        maximum = np.unravel_index(grayscale_cam.argmax(), shape=grayscale_cam.shape)
         axs[1].imshow(grayscale_cam)
+        axs[1].scatter([maximum[1]], [maximum[0]], color='red', s=50)
         plt.savefig(output_file)
 
 if __name__ == "__main__":

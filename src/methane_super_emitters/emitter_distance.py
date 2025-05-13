@@ -18,6 +18,7 @@ import click
 @click.option("-c", "--checkpoint", "checkpoint", required=True, type=click.Path(exists=True))
 def main(input_path, checkpoint):
     dataset = TROPOMISuperEmitterDataset(input_path, fields=['methane', 'u10', 'v10', 'qa'])
+    distances = []
     for input_file in dataset.positive_filenames:
         model = SuperEmitterDetector.load_from_checkpoint(checkpoint, fields=['methane', 'u10', 'v10', 'qa'])
         model.eval()
@@ -28,7 +29,15 @@ def main(input_path, checkpoint):
         example_image = torch.tensor(np.array([example_image]), dtype=torch.float)
         input_tensor = example_image.requires_grad_(True)
         grayscale_cam = cam(input_tensor=input_tensor)[0]
-        breakpoint()
+        location = np.argwhere(data['location'] == 1)
+        if len(location) < 1:
+            continue
+        maximum = np.unravel_index(grayscale_cam.argmax(), shape=grayscale_cam.shape)
+        idx = np.sqrt(((location - maximum) ** 2).sum(axis=1)).argmin()
+        units = np.array([7.0, 5.5])
+        distances.append(np.sqrt(((location[idx] * units - np.array(maximum) * units) ** 2).sum()))
+    plt.hist(distances, bins=25)
+    plt.savefig('emitter_distance_distribution.png')
         
 if __name__ == "__main__":
     main()
