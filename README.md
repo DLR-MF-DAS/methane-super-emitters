@@ -75,6 +75,20 @@ python -m methane_super_emitters.train -i ../dataset_v3/ -m 500
 
 Which will train for 500 epochs. The trained model checkpoint with the weights can be found under `lightning_logs/version_xy/checkpoints`
 
+# Prediction
+
+There is also a script for doing prediction using the data in the TROPOMI archive.
+
+```
+python -m methane_super_emitters.predict --help
+```
+
+Which will bring up the following help page.
+
+```
+
+```
+
 # API Documentation
 
 https://dlr-mf-das.github.io/methane-super-emitters/methane_super_emitters.html
