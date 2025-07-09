@@ -86,7 +86,24 @@ python -m methane_super_emitters.predict --help
 Which will bring up the following help page.
 
 ```
+Usage: python -m methane_super_emitters.predict [OPTIONS]
 
+Options:
+  -c, --checkpoint TEXT  Checkpoint file
+  -i, --input-dir TEXT   Directory with files
+  -o, --output-dir TEXT  Output directory
+  -n, --n-jobs INTEGER   Number of parallel jobs
+  -t, --threshold FLOAT  Threshold for the value of the sigmoid output to
+                         qualify as a hit
+  --help                 Show this message and exit.
+```
+
+The input directory is a directory with the yearly TROPOMI archive (same as during dataset creation). The output directory is used to store patches that are predicted to be super-emitters with a probability above the given threshold.
+
+Here is a sample call:
+
+```
+python3 -m methane_super_emitters.predict -c lightning_logs/version_10/checkpoints/epoch\=99-step\=23400.ckpt -d ../dataset_v3 -i /dss/dsstbyfs03/pn56su/pn56su-dss-0022/Sentinel-5p/L2/CH4/2018/ -o ../predictions_2018 -n 40
 ```
 
 # API Documentation
