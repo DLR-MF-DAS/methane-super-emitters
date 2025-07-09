@@ -2,6 +2,16 @@
 
 The goal of this project is to detect methane super emitters in TROPOMI data.
 
+# Installation
+
+To install in a new conda environment:
+
+```
+git clone https://github.com/DLR-MF-DAS/methane-super-emitters.git
+cd methane_super_emitters
+pip install -e .
+```
+
 # Data Set Collection
 
 In order to convert TROPOMI data to a format that can be used by our model we have prepared a script. The command line options for said script can be seen with:
