@@ -24,6 +24,20 @@ Options:
   --help                 Show this message and exit.
 ```
 
+A typical way to run it on terrabyte in order to collect samples with emitters (positive samples) would be:
+
+```
+python -m methane_super_emitters.create_dataset -i ../Schuit_etal2023_TROPOMI_all_plume_detections_2021.csv -o ../dataset_v3/ -n 40 -p /dss/dsstbyfs03/pn56su/pn56su-dss-0022/Sentinel-5p/L2/CH4/2021/
+```
+
+Some notes: the TROPOMI folder has to be the one that contains a full year of TROPOMI data. The .csv file has to follow a certain format (see source). The dataset folder has to contain two subfolders called positive and negative.
+
+For negative samples use:
+
+```
+python -m methane_super_emitters.create_dataset -i ../Schuit_etal2023_TROPOMI_all_plume_detections_2021.csv -o ../dataset_v3/ -n 40 -p /dss/dsstbyfs03/pn56su/pn56su-dss-0022/Sentinel-5p/L2/CH4/2021/ --negative
+```
+
 # API Documentation
 
 https://dlr-mf-das.github.io/methane-super-emitters/methane_super_emitters.html
