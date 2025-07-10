@@ -12,6 +12,46 @@ cd methane_super_emitters
 pip install -e .
 ```
 
+# Data Formats
+
+The dataset follows a very simple format. The dataset directory contains two subfolders. One is called `positive` and the other is called `negative`. Data samples in the positive folder correspond to samples with methane emitters in them. Data samples in the negative folder correspond to samples without emitters.
+
+```
+dataset/
+  positive/
+    ...
+  negative/
+    ...
+```
+
+The samples themselves are `.npz` files. These are simply compressed dictionaries of numpy arrays that you can load with `data = np.load(filename)` and then access the data with `data['fieldname']`. Below is the list of valid field names (only methane, qa, u10 and v10 are used when training and predicting):
+
+```
+methane: Methane concentrations ppm (32x32 array)
+lat: Latitude of the pixel center (32x32 array)
+lon: Longitude of the pixel center (32x32 array)
+lat_bounds: The latitudes of pixel corners (32x32x4 array)
+lon_bounds: The longitudes of pixel corners (32x32x4 array)
+qa: The quality assurance values (0 to 1 where high is good and low is bad) (32x32 array)
+time: Timestamps for each pixel (32x32 array)
+mask
+non_destriped
+u10: Windfield u component at 10m elevation (32x32 array)
+v10: Windfield v component at 10m elevation (32x32 array)
+sza
+vza
+scattering_angle
+sa_std
+cloud_fraction
+cirrus_reflectance
+methane_ratio_std
+methane_precision
+surface_albedo
+surface_albedo_precision
+aerosol_optical_thickness
+location: An array that is zero everywhere but where the estimated methane emission site is located (32x32 array)
+```
+
 # Data Set Collection
 
 In order to convert TROPOMI data to a format that can be used by our model we have prepared a script. The command line options for said script can be seen with:
