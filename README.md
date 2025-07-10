@@ -14,6 +14,8 @@ pip install -e .
 
 # Data Formats
 
+## Dataset
+
 The dataset follows a very simple format. The dataset directory contains two subfolders. One is called `positive` and the other is called `negative`. Data samples in the positive folder correspond to samples with methane emitters in them. Data samples in the negative folder correspond to samples without emitters.
 
 ```
@@ -51,6 +53,10 @@ surface_albedo_precision
 aerosol_optical_thickness
 location: An array that is zero everywhere but where the estimated methane emission site is located (32x32 array)
 ```
+
+## CSV file
+
+The CSV file contains known emitter locations.
 
 # Data Set Collection
 
