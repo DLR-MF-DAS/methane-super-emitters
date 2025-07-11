@@ -21,7 +21,7 @@ def process_tropomi_file(
             emitter = False
             location = np.zeros((32, 32))
             for csv_line in csv_data:
-                date, time, lat, lon, _, _, _ = csv_line.split(",")
+                date, time, lat, lon, _, _, _ = csv_line.split(",")[:7]
                 if (
                     (patch["lat"].min() < float(lat) < patch["lat"].max())
                     and (patch["lon"].min() < float(lon) < patch["lon"].max())
