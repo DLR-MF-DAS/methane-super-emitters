@@ -56,7 +56,17 @@ location: An array that is zero everywhere but where the estimated methane emiss
 
 ## CSV file
 
-The CSV file contains known emitter locations.
+The CSV file contains known emitter locations. The format of the CSV file should be similar to the following (there can be extra columns if need be):
+
+```
+date,time_UTC,lat,lon,source_rate_t/h,uncertainty_t/h,estimated_source_type
+20210101,06:00:45,36.75,109.76,32,16,Coal
+20210101,06:00:55,37.53,110.75,39,22,Coal
+20210101,07:37:49,20.89,85.22,4,2,Coal
+20210101,07:38:15,23.3,90.79,51,15,Landfill/Urban
+20210101,07:38:27,23.56,86.44,25,12,Coal
+...
+```
 
 # Data Set Collection
 
