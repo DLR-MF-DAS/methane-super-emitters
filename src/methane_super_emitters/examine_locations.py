@@ -49,18 +49,12 @@ def process_tropomi_file(
 )
 @click.option("-o", "--output_dir", help="Output folder")
 @click.option("-n", "--njobs", help="Number of jobs", default=1)
-@click.option(
-    "--negative",
-    is_flag=True,
-    help="Whether to collect negative samples",
-    default=False,
-)
-def main(input_file, prefix, output_dir, njobs, negative):
+def main(input_file, prefix, output_dir, njobs):
     for month_path in glob.glob(os.path.join(prefix, "*")):
         for day_path in glob.glob(os.path.join(month_path, "*")):
             Parallel(n_jobs=njobs)(
                 delayed(process_tropomi_file)(
-                    file_path, month_path, day_path, output_dir, input_file, negative
+                    file_path, month_path, day_path, output_dir, input_file
                 )
                 for file_path in glob.glob(os.path.join(day_path, "*.nc"))
             )
