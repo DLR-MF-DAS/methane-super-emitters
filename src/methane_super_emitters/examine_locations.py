@@ -32,7 +32,7 @@ def process_tropomi_file(
                     positive_path = os.path.join(
                         output_dir,
                         "positive",
-                        f"{date}_{time}_{lat}_{lon}_{np.random.randint(0, 10000):04d}.npz",
+                        f"{location}_{country}_{lat}_{lon}_{str(patch['time'])}.npz",
                     )
                     np.savez_compressed(positive_path, location=location, **patch)
     except OSError:
